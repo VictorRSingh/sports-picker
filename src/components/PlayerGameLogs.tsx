@@ -10,6 +10,34 @@ interface PlayerGameLogsProps {
 
 const PlayerGameLogs: React.FC<PlayerGameLogsProps> = ({ playerObject }) => {
   const { gamelog, fetchGameLog } = useGameLog({ playerObject });
+  const [overUnder, setOverUnder] = useState({
+    nba: {
+      points: undefined as number | undefined,
+      rebounds: undefined as number | undefined,
+      assists: undefined as number | undefined,
+    },
+    nfl: {
+      quarterback: {
+        passingYards: undefined as number | undefined,
+        completions: undefined as number | undefined,
+        rushingYards: undefined as number | undefined,
+      },
+      runningBack: {
+        rushingAttempts: undefined as number | undefined,
+        rushingYards: undefined as number | undefined,
+        rushingAverage: undefined as number | undefined,
+      },
+      wideReceiver: {
+        receptions: undefined as number | undefined,
+        receivingYards: undefined as number | undefined,
+        receivingTouchdowns: undefined as number | undefined,
+      },
+      tightEnd: {
+        receptions: undefined as number | undefined,
+        receivingYards: undefined as number | undefined,
+      },
+    },
+  });
 
   useEffect(() => {
     fetchGameLog();
@@ -59,55 +87,406 @@ const PlayerGameLogs: React.FC<PlayerGameLogsProps> = ({ playerObject }) => {
           </tbody>
         </table>
       </div>
-      <div className="flex flex-col h-fit max-w-full overflow-x-auto">
+      <div className="flex flex-col h-fit max-w-full overflow-x-auto mt-4">
         {playerObject.sport === "nba" ? (
           <>
-            <PlayerGraphs
-              gamelog={gamelog}
-              statistic="points"
-              overUnder={25.5}
-            />
-            <PlayerGraphs
-              gamelog={gamelog}
-              statistic="rebounds"
-              overUnder={4.5}
-            />
-            <PlayerGraphs
-              gamelog={gamelog}
-              statistic="assists"
-              overUnder={7.5}
-            />
+            <div className="">
+              <label htmlFor="" className="flex gap-x-2 justify-end">
+                <h1>Over/Under:</h1>
+                <input
+                  className="text-black"
+                  type="number"
+                  step={0.5}
+                  value={overUnder.nba.points}
+                  onChange={(e) =>
+                    setOverUnder((prev) => ({
+                      ...prev,
+                      nba: {
+                        ...prev.nba, // Keep other properties in nba unchanged
+                        points: Number(e.target.value), // Update the points property
+                      },
+                    }))
+                  }
+                />
+              </label>
+              <PlayerGraphs
+                gamelog={gamelog}
+                statistic="points"
+                overUnder={overUnder.nba.points}
+              />
+            </div>
+            <div className="">
+              <label htmlFor="" className="flex gap-x-2 justify-end">
+                <h1>Over/Under:</h1>
+                <input
+                  className="text-black"
+                  type="number"
+                  step={0.5}
+                  value={overUnder.nba.rebounds}
+                  onChange={(e) =>
+                    setOverUnder((prev) => ({
+                      ...prev,
+                      nba: {
+                        ...prev.nba, // Keep other properties in nba unchanged
+                        rebounds: Number(e.target.value), // Update the points property
+                      },
+                    }))
+                  }
+                />
+              </label>
+              <PlayerGraphs
+                gamelog={gamelog}
+                statistic="rebounds"
+                overUnder={overUnder.nba.rebounds}
+              />
+            </div>
+            <div className="">
+              <label htmlFor="" className="flex gap-x-2 justify-end">
+                <h1>Over/Under:</h1>
+                <input
+                  className="text-black"
+                  type="number"
+                  step={0.5}
+                  value={overUnder.nba.assists}
+                  onChange={(e) =>
+                    setOverUnder((prev) => ({
+                      ...prev,
+                      nba: {
+                        ...prev.nba, // Keep other properties in nba unchanged
+                        assists: Number(e.target.value), // Update the points property
+                      },
+                    }))
+                  }
+                />
+              </label>
+              <PlayerGraphs
+                gamelog={gamelog}
+                statistic="assists"
+                overUnder={overUnder.nba.assists}
+              />
+            </div>
           </>
         ) : playerObject.sport === "nfl" ? (
           <>
             {playerObject.position === "QUARTERBACK" ? (
               <>
-                <PlayerGraphs gamelog={gamelog} statistic="passingYards" />
-                <PlayerGraphs gamelog={gamelog} statistic="completions" />
-                <PlayerGraphs gamelog={gamelog} statistic="rushingYards" />
+                <div className="">
+                  <label htmlFor="" className="flex gap-x-2 justify-end">
+                    <h1>Over/Under:</h1>
+                    <input
+                      className="text-black"
+                      type="number"
+                      step={0.5}
+                      value={overUnder.nfl.quarterback.passingYards}
+                      onChange={(e) =>
+                        setOverUnder((prev) => ({
+                          ...prev,
+                          nfl: {
+                            ...prev.nfl,
+                            quarterback: {
+                              ...prev.nfl.quarterback,
+                              passingYards: Number(e.target.value)
+                            }
+                          },
+                        }))
+                      }
+                    />
+                  </label>
+                  <PlayerGraphs
+                    gamelog={gamelog}
+                    statistic="passingYards"
+                    overUnder={overUnder.nfl.quarterback.passingYards}
+                  />
+                </div>
+                <div className="">
+                  <label htmlFor="" className="flex gap-x-2 justify-end">
+                    <h1>Over/Under:</h1>
+                    <input
+                      className="text-black"
+                      type="number"
+                      step={0.5}
+                      value={overUnder.nfl.quarterback.completions}
+                      onChange={(e) =>
+                        setOverUnder((prev) => ({
+                          ...prev,
+                          nfl: {
+                            ...prev.nfl,
+                            quarterback: {
+                              ...prev.nfl.quarterback,
+                              completions: Number(e.target.value)
+                            }
+                          },
+                        }))
+                      }
+                    />
+                  </label>
+                  <PlayerGraphs
+                    gamelog={gamelog}
+                    statistic="completions"
+                    overUnder={overUnder.nfl.quarterback.completions}
+                  />
+                </div>
+                <div className="">
+                  <label htmlFor="" className="flex gap-x-2 justify-end">
+                    <h1>Over/Under:</h1>
+                    <input
+                      className="text-black"
+                      type="number"
+                      step={0.5}
+                      value={overUnder.nfl.quarterback.rushingYards}
+                      onChange={(e) =>
+                        setOverUnder((prev) => ({
+                          ...prev,
+                          nfl: {
+                            ...prev.nfl,
+                            quarterback: {
+                              ...prev.nfl.quarterback,
+                              rushingYards: Number(e.target.value)
+                            }
+                          },
+                        }))
+                      }
+                    />
+                  </label>
+                  <PlayerGraphs
+                    gamelog={gamelog}
+                    statistic="rushingYards"
+                    overUnder={overUnder.nfl.quarterback.rushingYards}
+                  />
+                </div>
               </>
             ) : playerObject.position === "RUNNING BACK" ? (
               <>
-                <PlayerGraphs gamelog={gamelog} statistic="rushingAttempts" />
-                <PlayerGraphs gamelog={gamelog} statistic="rushingYards" />
-                <PlayerGraphs
-                  gamelog={gamelog}
-                  statistic="rushingYardsPerAttemptAverage"
-                />
+                <div className="">
+                  <label htmlFor="" className="flex gap-x-2 justify-end">
+                    <h1>Over/Under:</h1>
+                    <input
+                      className="text-black"
+                      type="number"
+                      step={0.5}
+                      value={overUnder.nfl.runningBack.rushingAttempts}
+                      onChange={(e) =>
+                        setOverUnder((prev) => ({
+                          ...prev,
+                          nfl: {
+                            ...prev.nfl,
+                            runningBack: {
+                              ...prev.nfl.runningBack,
+                              rushingAttempts: Number(e.target.value)
+                            }
+                          },
+                        }))
+                      }
+                    />
+                  </label>
+                  <PlayerGraphs
+                    gamelog={gamelog}
+                    statistic="rushingAttempts"
+                    overUnder={overUnder.nfl.runningBack.rushingAttempts}
+                  />
+                </div>
+                <div className="">
+                  <label htmlFor="" className="flex gap-x-2 justify-end">
+                    <h1>Over/Under:</h1>
+                    <input
+                      className="text-black"
+                      type="number"
+                      step={0.5}
+                      value={overUnder.nfl.runningBack.rushingYards}
+                      onChange={(e) =>
+                        setOverUnder((prev) => ({
+                          ...prev,
+                          nfl: {
+                            ...prev.nfl,
+                            runningBack: {
+                              ...prev.nfl.runningBack,
+                              rushingYards: Number(e.target.value)
+                            }
+                          },
+                        }))
+                      }
+                    />
+                  </label>
+                  <PlayerGraphs
+                    gamelog={gamelog}
+                    statistic="rushingYards"
+                    overUnder={overUnder.nfl.runningBack.rushingYards}
+                  />
+                </div>
+                <div className="">
+                  <label htmlFor="" className="flex gap-x-2 justify-end">
+                    <h1>Over/Under:</h1>
+                    <input
+                      className="text-black"
+                      type="number"
+                      step={0.5}
+                      value={overUnder.nfl.runningBack.rushingAverage}
+                      onChange={(e) =>
+                        setOverUnder((prev) => ({
+                          ...prev,
+                          nfl: {
+                            ...prev.nfl,
+                            runningBack: {
+                              ...prev.nfl.runningBack,
+                              rushingAverage: Number(e.target.value)
+                            }
+                          },
+                        }))
+                      }
+                    />
+                  </label>
+                  <PlayerGraphs
+                    gamelog={gamelog}
+                    statistic="rushingYardsPerAttemptAverage"
+                    overUnder={overUnder.nfl.runningBack.rushingAverage}
+                  />
+                </div>
               </>
             ) : playerObject.position === "WIDE RECEIVER" ? (
               <>
-                <PlayerGraphs gamelog={gamelog} statistic="receptions" />
-                <PlayerGraphs gamelog={gamelog} statistic="receivingYards" />
-                <PlayerGraphs
-                  gamelog={gamelog}
-                  statistic="receivingTouchdowns"
-                />
+                <div className="">
+                  <label htmlFor="" className="flex gap-x-2 justify-end">
+                    <h1>Over/Under:</h1>
+                    <input
+                      className="text-black"
+                      type="number"
+                      step={0.5}
+                      value={overUnder.nfl.wideReceiver.receptions}
+                      onChange={(e) =>
+                        setOverUnder((prev) => ({
+                          ...prev,
+                          nfl: {
+                            ...prev.nfl,
+                            wideReceiver: {
+                              ...prev.nfl.wideReceiver,
+                              receptions: Number(e.target.value)
+                            }
+                          },
+                        }))
+                      }
+                    />
+                  </label>
+                  <PlayerGraphs
+                    gamelog={gamelog}
+                    statistic="receptions"
+                    overUnder={overUnder.nfl.wideReceiver.receptions}
+                  />
+                </div>
+                <div className="">
+                  <label htmlFor="" className="flex gap-x-2 justify-end">
+                    <h1>Over/Under:</h1>
+                    <input
+                      className="text-black"
+                      type="number"
+                      step={0.5}
+                      value={overUnder.nfl.wideReceiver.receivingYards}
+                      onChange={(e) =>
+                        setOverUnder((prev) => ({
+                          ...prev,
+                          nfl: {
+                            ...prev.nfl,
+                            wideReceiver: {
+                              ...prev.nfl.wideReceiver,
+                              receivingYards: Number(e.target.value)
+                            }
+                          },
+                        }))
+                      }
+                    />
+                  </label>
+                  <PlayerGraphs
+                    gamelog={gamelog}
+                    statistic="receivingYards"
+                    overUnder={overUnder.nfl.wideReceiver.receivingYards}
+                  />
+                </div>
+                <div className="">
+                  <label htmlFor="" className="flex gap-x-2 justify-end">
+                    <h1>Over/Under:</h1>
+                    <input
+                      className="text-black"
+                      type="number"
+                      step={0.5}
+                      value={overUnder.nfl.wideReceiver.receivingTouchdowns}
+                      onChange={(e) =>
+                        setOverUnder((prev) => ({
+                          ...prev,
+                          nfl: {
+                            ...prev.nfl,
+                            wideReceiver: {
+                              ...prev.nfl.wideReceiver,
+                              receivingTouchdowns: Number(e.target.value)
+                            }
+                          },
+                        }))
+                      }
+                    />
+                  </label>
+                  <PlayerGraphs
+                    gamelog={gamelog}
+                    statistic="receivingTouchdowns"
+                    overUnder={overUnder.nfl.wideReceiver.receivingTouchdowns}
+                  />
+                </div>
               </>
             ) : playerObject.position === "TIGHT END" ? (
               <>
-                <PlayerGraphs gamelog={gamelog} statistic="receptions" />
-                <PlayerGraphs gamelog={gamelog} statistic="receivingYards" />
+                <div className="">
+                  <label htmlFor="" className="flex gap-x-2 justify-end">
+                    <h1>Over/Under:</h1>
+                    <input
+                      className="text-black"
+                      type="number"
+                      step={0.5}
+                      value={overUnder.nfl.tightEnd.receptions}
+                      onChange={(e) =>
+                        setOverUnder((prev) => ({
+                          ...prev,
+                          nfl: {
+                            ...prev.nfl,
+                            tightEnd: {
+                              ...prev.nfl.tightEnd,
+                              receptions: Number(e.target.value)
+                            }
+                          },
+                        }))
+                      }
+                    />
+                  </label>
+                  <PlayerGraphs
+                    gamelog={gamelog}
+                    statistic="receptions"
+                    overUnder={overUnder.nfl.tightEnd.receptions}
+                  />
+                </div>
+                <div className="">
+                  <label htmlFor="" className="flex gap-x-2 justify-end">
+                    <h1>Over/Under:</h1>
+                    <input
+                      className="text-black"
+                      type="number"
+                      step={0.5}
+                      value={overUnder.nfl.tightEnd.receivingYards}
+                      onChange={(e) =>
+                        setOverUnder((prev) => ({
+                          ...prev,
+                          nfl: {
+                            ...prev.nfl,
+                            tightEnd: {
+                              ...prev.nfl.tightEnd,
+                              receivingYards: Number(e.target.value)
+                            }
+                          },
+                        }))
+                      }
+                    />
+                  </label>
+                  <PlayerGraphs
+                    gamelog={gamelog}
+                    statistic="receivingYards"
+                    overUnder={overUnder.nfl.tightEnd.receivingYards}
+                  />
+                </div>
               </>
             ) : (
               <>No Graph Data Available</>
