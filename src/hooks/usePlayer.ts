@@ -7,9 +7,7 @@ const usePlayer = () => {
   const [playerObject, setPlayerObject] = useState<Player>();
 
   const fetchPlayer = async () => {
-    const searchLink = `${
-      DEBUG ? "sportsPredictor" : ""
-    }/api/foxsports/search?player=${player?.replace(" ", "%20")}`;
+    const searchLink = `sportsPredictor/api/foxsports/search?player=${player?.replace(" ", "%20")}`;
 
     console.log(searchLink)
     try {
