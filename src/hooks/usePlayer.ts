@@ -8,7 +8,7 @@ const usePlayer = () => {
 
   const fetchPlayer = async () => {
     const searchLink = `${
-      DEBUG === true ? "sportsPredictor" : ""
+      DEBUG ? "sportsPredictor" : ""
     }/api/foxsports/search?player=${player?.replace(" ", "%20")}`;
 
     console.log(searchLink)
