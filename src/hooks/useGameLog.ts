@@ -11,7 +11,7 @@ const useGameLog = (gameLogProps: useGameLogProps) => {
   const [gamelog, setGameLog] = useState<GameLog[]>();
   const webUrl = gameLogProps.playerObject.webUrl;
 
-  const searchLink = `sportsPredictor/api/foxsports/player/gamelogs?webUrl=${webUrl}`;
+  const searchLink = `api/foxsports/player/gamelogs?webUrl=${webUrl}`;
 
   const fetchGameLog = async () => {
     try {
