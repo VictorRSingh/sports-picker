@@ -13,7 +13,13 @@ const usePlayer = () => {
 
     console.log(searchLink)
     try {
+<<<<<<< HEAD
+      const response = await axios.get(
+        `api/foxsports/search?player=${player?.replace(" ", "%20")}`
+      );
+=======
       const response = await axios.get(searchLink);
+>>>>>>> f444e43389c1cffa625202d630a69015069e62c3
       const data = await response.data;
       console.log(data);
       setPlayerObject(data);
