@@ -43,7 +43,7 @@ const PlayerGameLogs: React.FC<PlayerGameLogsProps> = ({ playerObject }) => {
               >
                 <td className="w-20 flex justify-end">{game.opposition}</td>
                 <td className="w-20 flex justify-end">{game.winLose}</td>
-                {rowData.map((data, idx) => (
+                {(rowData!).map((data, idx) => (
                   <td key={idx} className="w-20 flex justify-end">
                     {data}
                   </td>
@@ -79,7 +79,7 @@ const getHeaders = (playerObject: Player) => {
   } else if (playerObject.position === "RUNNING BACK" && playerObject.sport === "nfl") {
     // NFL Running Back
     return ["RATT", "RYDS", "RAVG", "RTD", "FUM", "TGT", "REC", "RECTD"];
-  } else if (playerObject.position === "WIDE RECEIVER" && playerObject.sport === "nfl") {
+  } else if (playerObject.position === "WIDE RECEIVER" || playerObject.position === "TIGHT END"  && playerObject.sport === "nfl") {
     // NFL Wide Receiver
     return ["TGT", "REC", "RECYDS", "RECTD", "RATT", "RYDS", "RAVG", "RTD"];
   } else if (playerObject.sport === "nba") {
@@ -105,7 +105,7 @@ const getHeaders = (playerObject: Player) => {
 };
 
 const getRowData = (game: GameLog, player: Player) => {
-  if (player.position === "QUARTERBACK") {
+  if (player.position === "QUARTERBACK" && player.sport === "nfl") {
     // NFL Quarterback
     return [
       game.completions || 0,
@@ -123,7 +123,7 @@ const getRowData = (game: GameLog, player: Player) => {
       game.rushingTouchdowns || 0,
       game.fumbles || 0,
     ];
-  } else if (player.position === "RUNNING BACK") {
+  } else if (player.position === "RUNNING BACK" && player.sport === "nfl") {
     // NFL Running Back
     return [
       game.rushingAttempts || 0,
@@ -135,7 +135,7 @@ const getRowData = (game: GameLog, player: Player) => {
       game.receptions || 0,
       game.receivingTouchdowns || 0,
     ];
-  } else if (player.position === "WIDE RECEIVER") {
+  } else if (player.position === "WIDE RECEIVER" || player.position === "TIGHT END" && player.sport === "nfl") {
     // NFL Wide Receiver
     return [
       game.targets || 0,
@@ -147,7 +147,7 @@ const getRowData = (game: GameLog, player: Player) => {
       game.rushingYardsPerAttemptAverage || 0,
       game.rushingTouchdowns || 0,
     ];
-  } else {
+  } else if (player.sport === "nba") {
         // NBA
         return [
           game.minutesPlayed,
