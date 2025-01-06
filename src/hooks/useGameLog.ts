@@ -10,7 +10,7 @@ interface useGameLogProps {
 
 const useGameLog = (gameLogProps: useGameLogProps) => {
   const [gamelog, setGameLog] = useState<GameLog[]>();
-  const webUrl = gameLogProps.playerObject.webUrl;
+  const webUrl = gameLogProps?.playerObject?.webUrl;
 
   const searchLink = `${DEBUG ? 'sportsPredictor/' : ''}api/foxsports/player/gamelogs?webUrl=${webUrl}`;
 

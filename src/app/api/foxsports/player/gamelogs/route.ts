@@ -86,7 +86,7 @@ function parseGameLog(data: Record<string, any>): GameLog {
     freeThrows: parseMadeTaken(data.FT),
     offensiveRebounds: data["OFF REB"] || undefined,
     defensiveRebounds: data["DEF REB"] || undefined,
-    reboundsTotal: data.REB || undefined,
+    rebounds: data.REB || undefined,
     assists: data.AST || undefined,
     steals: data.STL || undefined,
     blocks: data.BLK || undefined,

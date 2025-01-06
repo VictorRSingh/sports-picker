@@ -23,7 +23,7 @@ export interface GameLog {
   };
   offensiveRebounds?: number;
   defensiveRebounds?: number;
-  reboundsTotal?: number;
+  rebounds?: number;
   assists?: number;
   steals?: number;
   blocks?: number;
