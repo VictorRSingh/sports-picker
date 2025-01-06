@@ -1,3 +1,4 @@
+import { DEBUG } from "@/config";
 import { GameLog } from "@/interfaces/GameLog";
 import { Player } from "@/interfaces/Player";
 import axios from "axios";
@@ -11,7 +12,7 @@ const useGameLog = (gameLogProps: useGameLogProps) => {
   const [gamelog, setGameLog] = useState<GameLog[]>();
   const webUrl = gameLogProps.playerObject.webUrl;
 
-  const searchLink = `api/foxsports/player/gamelogs?webUrl=${webUrl}`;
+  const searchLink = `${DEBUG ? 'sportsPredictor/' : ''}api/foxsports/player/gamelogs?webUrl=${webUrl}`;
 
   const fetchGameLog = async () => {
     try {
