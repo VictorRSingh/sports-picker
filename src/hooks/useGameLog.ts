@@ -14,7 +14,7 @@ const useGameLog = (gameLogProps: useGameLogProps) => {
   const fetchGameLog = async () => {
     try {
       const response = await axios.get(
-        `/api/foxsports/player/gamelogs?webUrl=${webUrl}`
+        `sportsPredictor/api/foxsports/player/gamelogs?webUrl=${webUrl}`
       );
       const data = await response.data;
 
