@@ -9,7 +9,7 @@ const usePlayer = () => {
   const fetchPlayer = async () => {
     try {
       const response = await axios.get(
-        `${DEBUG ? 'sportsPredictor' : ''}/api/foxsports/search?player=${player?.replace(" ", "%20")}`
+        `sportsPredictor/api/foxsports/search?player=${player?.replace(" ", "%20")}`
       );
       const data = await response.data;
       console.log(data);
