@@ -1,7 +1,7 @@
 import { Player } from "@/interfaces/Player";
 import axios from "axios";
 import { useState } from "react";
-import { DEBUG } from "@/config";
+import { DEBUG } from "../config";
 const usePlayer = () => {
   const [player, setPlayer] = useState<string>("");
   const [playerObject, setPlayerObject] = useState<Player>();
