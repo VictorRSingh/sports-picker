@@ -4,4 +4,6 @@ export interface Player {
     name: string;
     team: string;
     webUrl: string;
+    position: string;
+    sport: string;
 }

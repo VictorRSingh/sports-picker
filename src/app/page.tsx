@@ -7,7 +7,6 @@ import usePlayer from "@/hooks/usePlayer";
 
 export default function Home() {
   const { player, setPlayer, fetchPlayer, playerObject } = usePlayer();
-  const sports = ["NBA", "NFL"];
 
   return (
     <div className="p-4 flex flex-col items-center w-full">

@@ -1,4 +1,5 @@
 import useGameLog from "@/hooks/useGameLog";
+import { GameLog } from "@/interfaces/GameLog";
 import { Player } from "@/interfaces/Player";
 import React, { useEffect, useState } from "react";
 
@@ -7,244 +8,164 @@ interface PlayerGameLogsProps {
 }
 
 const PlayerGameLogs: React.FC<PlayerGameLogsProps> = ({ playerObject }) => {
-  const { gamelog, setGameLog, fetchGameLog } = useGameLog({
-    playerObject: playerObject,
-  });
+  const { gamelog, fetchGameLog } = useGameLog({ playerObject });
 
   useEffect(() => {
     fetchGameLog();
+    console.log(playerObject);
   }, [playerObject]);
 
-  useEffect(() => {
-    console.log(gamelog);
-  }, [gamelog]);
+  if (!gamelog || gamelog.length === 0) return null;
+
+  const headers = getHeaders(playerObject);
 
   return (
     <div className="border-2 w-full overflow-x-auto max-w-[90vw]">
-      {gamelog && (
-        <table className="w-full border-collapse border border-gray-300">
-          <thead>
-            <tr className="grid grid-cols-[auto,auto,repeat(15,auto)] gap-2 p-2">
-              <th className="w-20">GAME</th>
-              <th className="w-20">W/L</th>
-              {gamelog[0].minutesPlayed ? (
-                //NBA
-                <>
-                  <th className="w-20">MIN</th>
-                  <th className="w-20">PTS</th>
-                  <th className="w-20">FG</th>
-                  <th className="w-20">3FG</th>
-                  <th className="w-20">FT</th>
-                  <th className="w-20">OFF REB</th>
-                  <th className="w-20">DEF REB</th>
-                  <th className="w-20">REB</th>
-                  <th className="w-20">AST</th>
-                  <th className="w-20">STL</th>
-                  <th className="w-20">BLK</th>
-                  <th className="w-20">PF</th>
-                  <th className="w-20">TO</th>
-                  <th className="w-20">+/-</th>
-                </>
-              ) : gamelog[0].completions ? (
-                //NFL Quarterback
-                <>
-                  <th className="w-20">COMP</th>
-                  <th className="w-20">PATT</th>
-                  <th className="w-20">PCT</th>
-                  <th className="w-20">PYDS</th>
-                  <th className="w-20">PAVG</th>
-                  <th className="w-20">PTD</th>
-                  <th className="w-20">INT</th>
-                  <th className="w-20">SCK</th>
-                  <th className="w-20">SCKYDS</th>
-                  <th className="w-20">RATT</th>
-                  <th className="w-20">RYDS</th>
-                  <th className="w-20">RAVG</th>
-                  <th className="w-20">RTD</th>
-                  <th className="w-20">FUM</th>
-                </>
-              ) : gamelog[0].receptions && !gamelog[0].fumbles ? (
-                //NFL Wide Receiver
-                <>
-                  <th className="w-20">TGT</th>
-                  <th className="w-20">REC</th>
-                  <th className="w-20">RECYDS</th>
-                  <th className="w-20">RECTD</th>
-                  <th className="w-20">RATT</th>
-                  <th className="w-20">RYDS</th>
-                  <th className="w-20">RAVG</th>
-                  <th className="w-20">RTD</th>
-                </>
-              ) : (
-                gamelog[0].fumbles && (
-                  // NFL Running Back
-                  <>
-                    <th className="w-20">RATT</th>
-                    <th className="w-20">RYDS</th>
-                    <th className="w-20">RAVG</th>
-                    <th className="w-20">RTD</th>
-                    <th className="w-20">FUM</th>
-                    <th className="w-20">TGT</th>
-                    <th className="w-20">REC</th>
-                    <th className="w-20">RECTD</th>
-                  </>
-                )
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {gamelog.map((game, index) => (
+      <table className="w-full border-collapse border border-gray-300">
+        <thead>
+          <tr className="grid grid-cols-[auto,auto,repeat(15,auto)] gap-2 p-2">
+            <th className="w-20">GAME</th>
+            <th className="w-20">W/L</th>
+            {headers.map((header, index) => (
+              <th key={index} className="w-20">
+                {header}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {gamelog.map((game, index) => {
+            const rowData = getRowData(game, playerObject);
+            return (
               <tr
                 key={index}
                 className="grid grid-cols-[auto,auto,repeat(15,auto)] gap-2 p-2 border-b border-gray-300"
               >
                 <td className="w-20 flex justify-end">{game.opposition}</td>
                 <td className="w-20 flex justify-end">{game.winLose}</td>
-                {game.minutesPlayed ? (
-                  //NBA
-                  <>
-                    <td className="w-20 flex justify-end">
-                      {game.minutesPlayed}
-                    </td>
-                    <td className="w-20 flex justify-end">
-                      {game.points}
-                    </td>
-                    <td className="w-20 flex justify-end">
-                      <p>{game.fieldGoals?.made}/{game.fieldGoals?.taken}</p>
-                    </td>
-                    <td className="w-20 flex justify-end">
-                      <p>{game.threePointFieldGoals?.made}/{game.threePointFieldGoals?.taken}</p>
-                    </td>
-                    <td className="w-20 flex justify-end">
-                      <p>{game.freeThrows?.made}/{game.freeThrows?.taken}</p>
-                    </td>
-                    <td className="w-20 flex justify-end">
-                      {game.offensiveRebounds}
-                    </td>
-                    <td className="w-20 flex justify-end">
-                      {game.defensiveRebounds}
-                    </td>
-                    <td className="w-20 flex justify-end">
-                      {game.reboundsTotal}
-                    </td>
-                    <td className="w-20 flex justify-end">
-                      {game.assists}
-                    </td>
-                    <td className="w-20 flex justify-end">
-                      {game.steals}
-                    </td>
-                    <td className="w-20 flex justify-end">
-                      {game.blocks}
-                    </td>
-                    <td className="w-20 flex justify-end">
-                      {game.personalFouls}
-                    </td>
-                    <td className="w-20 flex justify-end">
-                      {game.turnovers}
-                    </td>
-                    <td className="w-20 flex justify-end">
-                      {game.plusMinus}
-                    </td>
-                  </>
-                ) : game.completions ? (
-                  //NFL Quarterback
-                  <>
-                    <td className="w-20 flex justify-end">
-                      {game.completions}
-                    </td>
-                    <td className="w-20 flex justify-end">
-                      {game.passingAttempts}
-                    </td>
-                    <td className="w-20 flex justify-end">
-                      {game.completionPercent}
-                    </td>
-                    <td className="w-20 flex justify-end">
-                      {game.passingYards}
-                    </td>
-                    <td className="w-20 flex justify-end">
-                      {game.passingYardsPerAttemptAverage}
-                    </td>
-                    <td className="w-20 flex justify-end">
-                      {game.passingTouchdowns}
-                    </td>
-                    <td className="w-20 flex justify-end">
-                      {game.interceptions}
-                    </td>
-                    <td className="w-20 flex justify-end">{game.sacks}</td>
-                    <td className="w-20 flex justify-end">{game.sackYards}</td>
-                    <td className="w-20 flex justify-end">
-                      {game.rushingAttempts}
-                    </td>
-                    <td className="w-20 flex justify-end">
-                      {game.rushingYards}
-                    </td>
-                    <td className="w-20 flex justify-end">
-                      {game.rushingYardsPerAttemptAverage}
-                    </td>
-                    <td className="w-20 flex justify-end">
-                      {game.rushingTouchdowns}
-                    </td>
-                    <td className="w-20 flex justify-end">{game.fumbles}</td>
-                  </>
-                ) : game.receptions && !game.fumbles ? (
-                  //NFL Wide Receiver
-                  <>
-                    <td className="w-20 flex justify-end">{game.targets}</td>
-                    <td className="w-20 flex justify-end">{game.receptions}</td>
-                    <td className="w-20 flex justify-end">
-                      {game.receivingYards}
-                    </td>
-                    <td className="w-20 flex justify-end">
-                      {game.receivingTouchdowns}
-                    </td>
-                    <td className="w-20 flex justify-end">
-                      {game.rushingAttempts}
-                    </td>
-                    <td className="w-20 flex justify-end">
-                      {game.rushingYards}
-                    </td>
-                    <td className="w-20 flex justify-end">
-                      {game.rushingYardsPerAttemptAverage}
-                    </td>
-                    <td className="w-20 flex justify-end">
-                      {game.rushingTouchdowns}
-                    </td>
-                  </>
-                ) : (
-                  game.rushingAttempts &&
-                  game.fumbles && (
-                    //NFL Running
-                    <>
-                      <td className="w-20 flex justify-end">
-                        {game.rushingAttempts}
-                      </td>
-                      <td className="w-20 flex justify-end">
-                        {game.rushingYards}
-                      </td>
-                      <td className="w-20 flex justify-end">
-                        {game.rushingYardsPerAttemptAverage}
-                      </td>
-                      <td className="w-20 flex justify-end">
-                        {game.rushingTouchdowns}
-                      </td>
-                      <td className="w-20 flex justify-end">{game.fumbles}</td>
-                      <td className="w-20 flex justify-end">{game.targets}</td>
-                      <td className="w-20 flex justify-end">
-                        {game.receptions}
-                      </td>
-                      <td className="w-20 flex justify-end">
-                        {game.receivingTouchdowns}
-                      </td>
-                    </>
-                  )
-                )}
+                {rowData.map((data, idx) => (
+                  <td key={idx} className="w-20 flex justify-end">
+                    {data}
+                  </td>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
+};
+
+const getHeaders = (playerObject: Player) => {
+  if (playerObject.position === "QUARTERBACK" && playerObject.sport === "nfl") {
+    // NFL Quarterback
+    return [
+      "COMP",
+      "PATT",
+      "PCT",
+      "PYDS",
+      "PAVG",
+      "PTD",
+      "INT",
+      "SCK",
+      "SCKYDS",
+      "RATT",
+      "RYDS",
+      "RAVG",
+      "RTD",
+      "FUM",
+    ];
+  } else if (playerObject.position === "RUNNING BACK" && playerObject.sport === "nfl") {
+    // NFL Running Back
+    return ["RATT", "RYDS", "RAVG", "RTD", "FUM", "TGT", "REC", "RECTD"];
+  } else if (playerObject.position === "WIDE RECEIVER" && playerObject.sport === "nfl") {
+    // NFL Wide Receiver
+    return ["TGT", "REC", "RECYDS", "RECTD", "RATT", "RYDS", "RAVG", "RTD"];
+  } else if (playerObject.sport === "nba") {
+    // NBA
+    return [
+      "MIN",
+      "PTS",
+      "FG",
+      "3FG",
+      "FT",
+      "OFF REB",
+      "DEF REB",
+      "REB",
+      "AST",
+      "STL",
+      "BLK",
+      "PF",
+      "TO",
+      "+/-",
+    ];
+  }
+  return [];
+};
+
+const getRowData = (game: GameLog, player: Player) => {
+  if (player.position === "QUARTERBACK") {
+    // NFL Quarterback
+    return [
+      game.completions || 0,
+      game.passingAttempts || 0,
+      game.completionPercent || 0,
+      game.passingYards || 0,
+      game.passingYardsPerAttemptAverage || 0,
+      game.passingTouchdowns || 0,
+      game.interceptions || 0,
+      game.sacks || 0,
+      game.sackYards || 0,
+      game.rushingAttempts || 0,
+      game.rushingYards || 0,
+      game.rushingYardsPerAttemptAverage || 0,
+      game.rushingTouchdowns || 0,
+      game.fumbles || 0,
+    ];
+  } else if (player.position === "RUNNING BACK") {
+    // NFL Running Back
+    return [
+      game.rushingAttempts || 0,
+      game.rushingYards || 0,
+      game.rushingYardsPerAttemptAverage || 0,
+      game.rushingTouchdowns || 0,
+      game.fumbles || 0,
+      game.targets || 0,
+      game.receptions || 0,
+      game.receivingTouchdowns || 0,
+    ];
+  } else if (player.position === "WIDE RECEIVER") {
+    // NFL Wide Receiver
+    return [
+      game.targets || 0,
+      game.receptions || 0,
+      game.receivingYards || 0,
+      game.receivingTouchdowns || 0,
+      game.rushingAttempts || 0,
+      game.rushingYards || 0,
+      game.rushingYardsPerAttemptAverage || 0,
+      game.rushingTouchdowns || 0,
+    ];
+  } else {
+        // NBA
+        return [
+          game.minutesPlayed,
+          game.points,
+          `${game.fieldGoals?.made}/${game.fieldGoals?.taken}`,
+          `${game.threePointFieldGoals?.made}/${game.threePointFieldGoals?.taken}`,
+          `${game.freeThrows?.made}/${game.freeThrows?.taken}`,
+          game.offensiveRebounds || 0,
+          game.defensiveRebounds || 0,
+          game.reboundsTotal || 0,
+          game.assists || 0,
+          game.steals || 0,
+          game.blocks || 0,
+          game.personalFouls || 0,
+          game.turnovers || 0,
+          game.plusMinus,
+        ];
+  }
 };
 
 export default PlayerGameLogs;
