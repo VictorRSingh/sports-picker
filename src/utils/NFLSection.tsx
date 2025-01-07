@@ -7,13 +7,18 @@ interface NFLProps {
   position: string;
   overUnder: any;
   setOverUnder: React.Dispatch<React.SetStateAction<any>>;
+  average: Record<string, Record<string, number | undefined>>;
 }
+
+// Utility function to normalize position keys
+const normalizeKey = (key: string) => key.replace(" ", "_").toLowerCase();
 
 export const NFLSection: React.FC<NFLProps> = ({
   gamelog,
   position,
   overUnder,
   setOverUnder,
+  average,
 }) => {
   const positionMapping: Record<string, (keyof GameLog)[]> = {
     QUARTERBACK: ["passingYards", "completions", "rushingYards"],
@@ -26,22 +31,26 @@ export const NFLSection: React.FC<NFLProps> = ({
     TIGHT_END: ["receptions", "receivingYards"],
   };
 
-  const stats = positionMapping[position] || [];
+  // Normalize position key
+  const normalizedPosition = normalizeKey(position);
+  const stats = positionMapping[position.replace(" ", "_")] || [];
 
+  console.log(normalizedPosition)
   return (
     <>
       {stats.map((stat) => (
-        <div className="mt-4" key={stat}>
+        <div className="mt-4 w-full" key={stat}>
+          {/* OverUnderInput */}
           <OverUnderInput
             label={`Over/Under: ${stat}`}
-            value={overUnder[position.toLowerCase()][stat]} // Use proper type or cast
+            value={overUnder[normalizedPosition]?.[stat] || 0} // Fallback for undefined
             onChange={(value) =>
               setOverUnder((prev: any) => ({
                 ...prev,
                 nfl: {
                   ...prev.nfl,
-                  [position.toLowerCase()]: {
-                    ...prev.nfl[position.toLowerCase()],
+                  [normalizedPosition]: {
+                    ...prev.nfl[normalizedPosition],
                     [stat]: value,
                   },
                 },
@@ -49,11 +58,13 @@ export const NFLSection: React.FC<NFLProps> = ({
             }
           />
 
+          {/* PlayerGraphs */}
           <div className="border-2 border-gray-300 h-full">
             <PlayerGraphs
               gamelog={gamelog}
               statistic={stat}
-              overUnder={overUnder[position.toLowerCase()][stat]}
+              overUnder={overUnder[normalizedPosition]?.[stat] || 0}
+              average={average[normalizedPosition]?.[stat]} // Dynamically access average
             />
           </div>
         </div>

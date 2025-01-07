@@ -26,30 +26,32 @@ interface PlayerGraphProps {
   gamelog: GameLog[];
   statistic: keyof GameLog;
   overUnder?: number;
+  average?: number;
 }
 
-const PlayerGraph: React.FC<PlayerGraphProps> = ({ gamelog, statistic, overUnder }) => {
-  const labels = gamelog.map((game) => game.opposition).slice(0, 10);
-  const dataValues = gamelog.map((game) => game[statistic]).slice(0, 10);
+const PlayerGraph: React.FC<PlayerGraphProps> = ({ gamelog, statistic, overUnder, average }) => {
+  const labels = gamelog.map((game) => game.opposition);
+  const dataValues = gamelog.map((game) => game[statistic]);
 
   const data = {
     labels,
     datasets: [
+      
       {
         label: `Player ${statistic}`,
         data: dataValues,
         borderColor: "rgba(75, 192, 192, 1)",
         backgroundColor: "rgba(75, 192, 192, 0.2)",
-        borderWidth: 2,
+        borderWidth: 3,
         tension: 0.4,
       },
+
       {
-        label: 'Over/Under Line',
-        data: Array(labels.length).fill(overUnder),
-        borderColor: "rgba(255, 99, 132, 1)", // Red line
+        label: 'Average',
+        data: Array(labels.length).fill(average),
+        borderColor: "rgba(255, 165, 0, 1)", // Orange line
         backgroundColor: "rgba(255, 99, 132, 0.2)",
-        borderWidth: 2,
-        borderDash: [10, 5], // Dashed line
+        borderWidth: 3,
         tension: 0, // Straight line
       }
     ],
@@ -87,8 +89,8 @@ const PlayerGraph: React.FC<PlayerGraphProps> = ({ gamelog, statistic, overUnder
   
 
   return (
-    <div className="w-full max-h-[50vh] overflow-x-auto overflow-y-auto max-w-[90vw]">
-      <Line className="" data={data} options={options} />
+    <div className="w-full overflow-x-auto overflow-y-auto">
+      <Line className="w-full overflow-x-auto" data={data} options={options} />
     </div>
   );
 };
