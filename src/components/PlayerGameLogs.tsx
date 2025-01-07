@@ -43,11 +43,11 @@ const PlayerGameLogs: React.FC<PlayerGameLogsProps> = ({ playerObject }) => {
       <div className="border-2 w-full max-h-[40vh] overflow-x-auto overflow-y-auto max-w-[90vw]">
       <table className="w-full border-collapse border border-gray-300">
           <thead>
-            <tr className="grid grid-cols-[auto,auto,repeat(15,auto)] gap-2 p-2">
-              <th className="w-20">GAME</th>
-              <th className="w-20">W/L</th>
+            <tr className="grid grid-cols-[auto,auto,repeat(15,auto)] gap-2 border">
+              <th className="w-20 ">GAME</th>
+              <th className="w-20 ">W/L</th>
               {headers.map((header, index) => (
-                <th key={index} className="w-20">
+                <th key={index} className="w-20 ">
                   {header}
                 </th>
               ))}
@@ -59,12 +59,12 @@ const PlayerGameLogs: React.FC<PlayerGameLogsProps> = ({ playerObject }) => {
               return (
                 <tr
                   key={index}
-                  className="grid grid-cols-[auto,auto,repeat(15,auto)] gap-2 p-2 border-b border-gray-300"
+                  className="grid grid-cols-[auto,auto,repeat(15,auto)] gap-2 border-b border-gray-300"
                 >
-                  <td className="w-20 flex justify-end">{game.opposition}</td>
-                  <td className="w-20 flex justify-end">{game.winLose}</td>
+                  <td className="w-20 flex justify-center">{game.opposition}</td>
+                  <td className="w-20 flex justify-center">{game.winLose}</td>
                   {rowData!.map((data, idx) => (
-                    <td key={idx} className="w-20 flex justify-end">
+                    <td key={idx} className="w-20 flex justify-center">
                       {data}
                     </td>
                   ))}

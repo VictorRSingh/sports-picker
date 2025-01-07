@@ -88,7 +88,7 @@ const PlayerGraph: React.FC<PlayerGraphProps> = ({ gamelog, statistic, overUnder
 
   return (
     <div className="w-full max-h-[50vh] overflow-x-auto overflow-y-auto max-w-[90vw]">
-      <Line data={data} options={options} />
+      <Line className="" data={data} options={options} />
     </div>
   );
 };

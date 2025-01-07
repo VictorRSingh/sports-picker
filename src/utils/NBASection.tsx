@@ -8,14 +8,18 @@ interface NBAProps {
   setOverUnder: React.Dispatch<React.SetStateAction<any>>;
 }
 
-export const NBASection: React.FC<NBAProps> = ({ gamelog, overUnder, setOverUnder }) => {
+export const NBASection: React.FC<NBAProps> = ({
+  gamelog,
+  overUnder,
+  setOverUnder,
+}) => {
   // Explicitly list the keys
   const stats: (keyof GameLog)[] = ["points", "rebounds", "assists"];
 
   return (
     <>
       {stats.map((stat) => (
-        <div className="w-full" key={stat}>
+        <div className="mt-4" key={stat}>
           <OverUnderInput
             label={`Over/Under: ${stat}`}
             value={overUnder[stat as keyof typeof overUnder]} // Type assertion for nested keys
@@ -29,11 +33,13 @@ export const NBASection: React.FC<NBAProps> = ({ gamelog, overUnder, setOverUnde
               }))
             }
           />
-          <PlayerGraphs
-            gamelog={gamelog}
-            statistic={stat} // Ensure PlayerGraphs accepts `keyof GameLog`
-            overUnder={overUnder[stat as keyof typeof overUnder]}
-          />
+          <div className="border-2 border-gray-300 h-full">
+            <PlayerGraphs
+              gamelog={gamelog}
+              statistic={stat} // Ensure PlayerGraphs accepts `keyof GameLog`
+              overUnder={overUnder[stat as keyof typeof overUnder]}
+            />
+          </div>
         </div>
       ))}
     </>
