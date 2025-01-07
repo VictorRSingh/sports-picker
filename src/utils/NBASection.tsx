@@ -15,7 +15,7 @@ export const NBASection: React.FC<NBAProps> = ({ gamelog, overUnder, setOverUnde
   return (
     <>
       {stats.map((stat) => (
-        <div key={stat}>
+        <div className="w-full" key={stat}>
           <OverUnderInput
             label={`Over/Under: ${stat}`}
             value={overUnder[stat as keyof typeof overUnder]} // Type assertion for nested keys

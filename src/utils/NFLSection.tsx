@@ -22,7 +22,7 @@ interface NFLProps {
     return (
       <>
         {stats.map((stat) => (
-          <div key={stat}>
+          <div className="w-full" key={stat}>
             <OverUnderInput
               label={`Over/Under: ${stat}`}
               value={overUnder[position.toLowerCase()][stat]} // Use proper type or cast
