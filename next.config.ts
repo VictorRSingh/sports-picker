@@ -3,8 +3,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   reactStrictMode: true,
-  basePath: "/sportsPredictor",
-  assetPrefix: "/sportsPredictor"
+  basePath: "/sportsPicker",
+  assetPrefix: "/sportsPicker"
 };
 
 export default nextConfig;
