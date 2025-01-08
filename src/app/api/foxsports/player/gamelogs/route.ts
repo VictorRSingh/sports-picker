@@ -62,10 +62,8 @@ export async function GET(request: NextRequest) {
 }
 
 function parseGameLog(data: Record<string, any>): GameLog {
-  // Extract and transform the "GAME" field
-  const [opposition, winLose] = data.GAME.replace("@", "").split("\n").map((item: any) =>
-    item.trim()
-  );
+  // Helper to parse numeric values, treating "-" as 0
+  const parseNumeric = (value: any): number => (value === "-" || !value ? 0 : Number(value));
 
   // Helper to parse "made/taken" format
   const parseMadeTaken = (
@@ -76,40 +74,45 @@ function parseGameLog(data: Record<string, any>): GameLog {
     return { made, taken };
   };
 
+  // Extract and transform the "GAME" field
+  const [opposition, winLose] = data.GAME.replace("@", "").split("\n").map((item: any) =>
+    item.trim()
+  );
+
   return {
     opposition,
     winLose,
-    minutesPlayed: data.MIN || undefined,
-    points: data.PTS || undefined,
+    minutesPlayed: parseNumeric(data.MIN),
+    points: parseNumeric(data.PTS),
     fieldGoals: parseMadeTaken(data.FG),
     threePointFieldGoals: parseMadeTaken(data["3FG"]),
     freeThrows: parseMadeTaken(data.FT),
-    offensiveRebounds: data["OFF REB"] || undefined,
-    defensiveRebounds: data["DEF REB"] || undefined,
-    rebounds: data.REB || undefined,
-    assists: data.AST || undefined,
-    steals: data.STL || undefined,
-    blocks: data.BLK || undefined,
-    personalFouls: data.PF || undefined,
-    turnovers: data.TO || undefined,
-    plusMinus: data["+/-"] || undefined,
-    completions: data["COMP"] || undefined,
-    passingAttempts: data["PATT"] || undefined,
-    completionPercent: data["PCT"] || undefined,
-    passingYards: data["PYDS"] || undefined,
-    passingYardsPerAttemptAverage: data["PAVG"] || undefined,
-    passingTouchdowns: data["PTD"] || undefined,
-    interceptions: data["INT"] || undefined,
-    sacks: data["SCK"] || undefined,
-    sackYards: data["SCKYDS"] || undefined,
-    rushingAttempts: data["RATT"] || undefined,
-    rushingYards: data["RYDS"] || undefined,
-    rushingYardsPerAttemptAverage: data["RAVG"] || undefined,
-    rushingTouchdowns: data["RTD"] || undefined,
-    fumbles: data["FUM"] || undefined,
-    targets: data["TGT"] || undefined,
-    receptions: data["REC"],
-    receivingYards: data["RECYDS"],
-    receivingTouchdowns: data["RECTD"],
+    offensiveRebounds: parseNumeric(data["OFF REB"]),
+    defensiveRebounds: parseNumeric(data["DEF REB"]),
+    rebounds: parseNumeric(data.REB),
+    assists: parseNumeric(data.AST),
+    steals: parseNumeric(data.STL),
+    blocks: parseNumeric(data.BLK),
+    personalFouls: parseNumeric(data.PF),
+    turnovers: parseNumeric(data.TO),
+    plusMinus: parseNumeric(data["+/-"]),
+    completions: parseNumeric(data["COMP"]),
+    passingAttempts: parseNumeric(data["PATT"]),
+    completionPercent: parseNumeric(data["PCT"]),
+    passingYards: parseNumeric(data["PYDS"]),
+    passingYardsPerAttemptAverage: parseNumeric(data["PAVG"]),
+    passingTouchdowns: parseNumeric(data["PTD"]),
+    interceptions: parseNumeric(data["INT"]),
+    sacks: parseNumeric(data["SCK"]),
+    sackYards: parseNumeric(data["SCKYDS"]),
+    rushingAttempts: parseNumeric(data["RATT"]),
+    rushingYards: parseNumeric(data["RYDS"]),
+    rushingYardsPerAttemptAverage: parseNumeric(data["RAVG"]),
+    rushingTouchdowns: parseNumeric(data["RTD"]),
+    fumbles: parseNumeric(data["FUM"]),
+    targets: parseNumeric(data["TGT"]),
+    receptions: parseNumeric(data["REC"]),
+    receivingYards: parseNumeric(data["RECYDS"]),
+    receivingTouchdowns: parseNumeric(data["RECTD"]),
   };
 }

@@ -1,10 +1,10 @@
 import { DEBUG } from "@/config";
 import { Player } from "@/interfaces/Player";
 import axios from "axios";
-import { useState } from "react";
-const usePlayer = () => {
+import { Dispatch, SetStateAction, useState } from "react";
+
+const usePlayer = (playerObject: Player, setPlayerObject: Dispatch<SetStateAction<Player>>) => {
   const [player, setPlayer] = useState<string>("");
-  const [playerObject, setPlayerObject] = useState<Player>();
 
   const fetchPlayer = async () => {
     const searchLink = `${DEBUG ? 'sportsPredictor/' : ''}api/foxsports/search?player=${player?.replace(" ", "%20")}`;

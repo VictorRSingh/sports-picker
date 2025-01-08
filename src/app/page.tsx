@@ -11,24 +11,16 @@ import { Player } from "@/interfaces/Player";
 import { useEffect, useState } from "react";
 
 export default function Home() {
-  const { player, setPlayer, fetchPlayer, playerObject } = usePlayer();
-  const [foundPlayer, setFoundPlayer] = useState<Player>();
   const [gameLogs, setGameLogs] = useState<GameLog[]>([]);
-
-  useEffect(() => {
-    if (playerObject) {
-      setFoundPlayer(playerObject);
-    }
-  }, [playerObject]);
+  const [playerObject, setPlayerObject] = useState<Player>();
 
   return (
     <div className="flex flex-col md:flex-row max-h-screen overflow-hidden">
       {/* Sidebar */}
       <div className="flex flex-col items-center gap-y-4 md:w-1/3 border-b-2 md:border-r-2 md:border-b-0 p-4">
         <PlayerSearch
-          player={player}
-          setPlayer={setPlayer}
-          fetchPlayer={fetchPlayer}
+          playerObject={playerObject as Player}
+          setPlayerObject={setPlayerObject}
         />
         {playerObject && <PlayerView playerData={playerObject} />}
 

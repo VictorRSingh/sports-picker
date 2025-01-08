@@ -120,16 +120,18 @@ const PlayerGameLogs: React.FC<PlayerGameLogsProps> = ({
       </div>
       <div className="">
         {playerObject.sport === "nba" ? (
-          <NBASection
-            gamelog={gamelog}
-            overUnder={overUnder.nba}
-            setOverUnder={setOverUnder}
-            average={{
-              points: getPlayerPointAverage(gamelog),
-              rebounds: getPlayerReboundAverage(gamelog),
-              assists: getPlayerAssistsAverage(gamelog),
-            }}
-          />
+          <>
+            <NBASection
+              gamelog={gamelog}
+              overUnder={overUnder.nba}
+              setOverUnder={setOverUnder}
+              average={{
+                points: getPlayerPointAverage(gamelog),
+                rebounds: getPlayerReboundAverage(gamelog),
+                assists: getPlayerAssistsAverage(gamelog),
+              }}
+            />
+          </>
         ) : playerObject.sport === "nfl" ? (
           <NFLSection
             gamelog={gamelog}
@@ -145,17 +147,19 @@ const PlayerGameLogs: React.FC<PlayerGameLogsProps> = ({
               running_back: {
                 rushingAttempts: getRunningBackRushingAttemptsAverage(gamelog),
                 rushingYards: getRunningBackRushingYardsAverage(gamelog),
-                rushingYardsPerAttemptAverage: getRunningBackRushingYardsAttemptAverage(gamelog)
+                rushingYardsPerAttemptAverage:
+                  getRunningBackRushingYardsAttemptAverage(gamelog),
               },
               wide_receiver: {
                 receptions: getWideReceiverReceptionsAverage(gamelog),
                 receivingYards: getWideReceiverReceivingYardsAverage(gamelog),
-                receivingTouchdowns: getWideReceiverReceivingTouchdownsAverage(gamelog)
+                receivingTouchdowns:
+                  getWideReceiverReceivingTouchdownsAverage(gamelog),
               },
               tight_end: {
                 receptions: getTightEndReceptionsAverage(gamelog),
-                receivingYards: getTightEndReceivingYardsAverage(gamelog)
-              }
+                receivingYards: getTightEndReceivingYardsAverage(gamelog),
+              },
             }}
           />
         ) : (

@@ -13,7 +13,8 @@ const NFLStatistics: React.FC<NFLStatisticsProps> = ({
   playerObject,
 }) => {
   return (
-    <div>
+    <>
+        <div>
       {playerObject.position === "QUARTERBACK" ? (
         <>
         <h1>Passing Yards Average: {getQuarterbackPassingAverage(gameLogs).toFixed(1)}</h1>
@@ -40,7 +41,10 @@ const NFLStatistics: React.FC<NFLStatisticsProps> = ({
       ) : (
         <>No Statistics Available</>
       )}
+
     </div>
+    </>
+
   );
 };
 
