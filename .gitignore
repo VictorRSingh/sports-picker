@@ -130,3 +130,5 @@ dist
 .pnp.*
 
 src/config.ts
+
+next.config.ts
