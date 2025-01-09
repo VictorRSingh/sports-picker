@@ -1,26 +1,16 @@
 import usePlayer from "@/hooks/usePlayer";
 import { Player } from "@/interfaces/Player";
-import React, { Dispatch, SetStateAction, useState, useEffect } from "react";
+import React, { Dispatch, SetStateAction, useState } from "react";
 import { FaSearch, FaCheck } from "react-icons/fa";
 
 interface PlayerSearchProps {
-  setPlayerObject: any;
-  playerObject: Player
+  player: Player | null;
+  setPlayer: Dispatch<SetStateAction<Player | null>>;
 }
 
-const PlayerSearch: React.FC<PlayerSearchProps> = ({ playerObject, setPlayerObject}) => {
-    const { player, setPlayer, fetchPlayer } = usePlayer(playerObject, setPlayerObject);
-  const [inputValue, setInputValue] = useState(player); // Local state for input
-
-  // Debounce logic
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setPlayer(inputValue); // Update parent state after delay
-    }, 800); // Debounce delay in ms
-
-    return () => clearTimeout(handler); // Cleanup timeout on value change
-  }, [inputValue, setPlayer]);
-
+const PlayerSearch = ({setPlayer}: PlayerSearchProps) => {
+  const [playerQuery, setPlayerQuery] = useState<string>("");
+  const { fetchPlayer } = usePlayer(playerQuery, setPlayer)
   const handleSubmit = () => {
     fetchPlayer(); // Trigger fetch when the button is clicked
   };
@@ -33,8 +23,8 @@ const PlayerSearch: React.FC<PlayerSearchProps> = ({ playerObject, setPlayerObje
         </div>
         <input
           className="text-black"
-          value={inputValue} // Bind inputValue to the input
-          onChange={(e) => setInputValue(e.target.value)} // Update local state onChange
+          value={playerQuery} // Bind inputValue to the input
+          onChange={(e) => setPlayerQuery(e.target.value)} // Update local state onChange
           placeholder="Player Search"
         />
         <button

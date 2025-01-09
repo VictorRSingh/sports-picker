@@ -1,7 +1,8 @@
 import { GameLog } from "@/interfaces/GameLog";
 import { Player } from "@/interfaces/Player";
 
-export const getRowData = (game: GameLog, player: Player) => {
+export const getRowData = (game: GameLog, player: Player | null) => {
+  if (player) {
     if (player.position === "QUARTERBACK" && player.sport === "nfl") {
       // NFL Quarterback
       return [
@@ -66,5 +67,5 @@ export const getRowData = (game: GameLog, player: Player) => {
         game.plusMinus,
       ];
     }
-  };
-  
+  }
+};
