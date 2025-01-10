@@ -1,4 +1,5 @@
 import { Link } from "@/interfaces/Link";
+import { DEBUG } from "@/config";
 
 export const Links: Link[] = [
     {
@@ -7,7 +8,9 @@ export const Links: Link[] = [
     },
     {
         name: 'NBA',
-        path: '/NBA'
+        path:       DEBUG
+        ? "http://localhost:3000/sportsPicker/NBA"
+        : "https://victorsingh.ca/sportsPicker/NBA"
     },
     {
         name: 'NFL',
