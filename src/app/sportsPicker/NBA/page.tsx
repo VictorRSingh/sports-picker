@@ -7,7 +7,7 @@ const NBA = () => {
     const router = useRouter();
 
     useEffect(() => {
-        router.push(`${DEBUG ? '/NBA/schedule' : '/NBA/schedule'}`)
+        router.push(`${DEBUG ? 'http://localhost:3000/sportsPicker/sportsPicker/NBA/schedule' : 'sportsPicker/NBA/schedule'}`)
     }, [])
   return (
     <div>Rerouting</div>

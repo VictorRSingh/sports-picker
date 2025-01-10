@@ -9,7 +9,7 @@ export const Links: Link[] = [
     {
         name: 'NBA',
         path:       DEBUG
-        ? "http://localhost:3000/sportsPicker/NBA"
+        ? "http://localhost:3000/sportsPicker/sportsPicker/NBA"
         : "https://victorsingh.ca/sportsPicker/NBA"
     },
     {
