@@ -9,8 +9,10 @@ const usePlayer = (
 ) => {
   const fetchPlayer = async () => {
     const searchLink = `${
-      DEBUG ? "sportsPicker/" : ""
-    }api/foxsports/search?player=${playerQuery?.replace(" ", "%20")}`;
+      DEBUG
+        ? "http://localhost:3000/sportsPicker"
+        : "https://victorsingh.ca/sportsPicker"
+    }/api/foxsports/search?player=${playerQuery?.replace(" ", "%20")}`;
 
     console.log(searchLink);
     try {

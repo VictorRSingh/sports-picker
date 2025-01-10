@@ -12,8 +12,10 @@ const useGameLog = (
   const webUrl = player ? player.webUrl : null;
 
   const searchLink = `${
-    DEBUG ? "sportsPicker/" : ""
-  }api/foxsports/player/gamelogs?webUrl=${webUrl}`;
+    DEBUG
+    ? "http://localhost:3000/sportsPicker"
+    : "https://victorsingh.ca/sportsPicker"
+  }/api/foxsports/player/gamelogs?webUrl=${webUrl}`;
 
   const fetchGameLog = async () => {
     if (webUrl) {

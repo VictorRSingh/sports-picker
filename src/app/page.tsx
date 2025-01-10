@@ -1,5 +1,6 @@
 "use client";
 
+import Hero from "@/components/main/Hero";
 import PlayerGameData from "@/components/PlayerGameData";
 import PlayerGraphStatistics from "@/components/PlayerGraphStatistics";
 import PlayerSearch from "@/components/PlayerSearch";
@@ -12,35 +13,12 @@ export default function Home() {
   const [gameLogs, setGameLogs] = useState<GameLog[]>([]);
   const [player, setPlayer] = useState<Player | null>(null);
   return (
-    <div className="flex flex-col md:flex-row max-h-screen overflow-hidden">
-      {/* Sidebar */}
-      <div className="flex flex-col items-center gap-y-4 md:w-1/3 border-b-2 md:border-r-2 md:border-b-0 p-4">
-        <PlayerSearch player={player} setPlayer={setPlayer} />
-        {player && <PlayerView playerData={player} />}
-
-        {gameLogs.length > 0 && player && (
-          <PlayerGraphStatistics playerObject={player} gameLogs={gameLogs} />
-        )}
-      </div>
-
-      {/* Main Content */}
-      <div className="flex flex-grow overflow-auto md:w-2/3">
-        {player && (
-          <>
-            {player.sport === "nba" || player.sport === "nfl" ? (
-              <div className="w-full overflow-x-auto text-sm max-h-[100%]">
-                <PlayerGameData
-                  player={player}
-                  gameLogs={gameLogs}
-                  setGameLogs={setGameLogs}
-                />
-              </div>
-            ) : (
-              <div className="w-full h-full flex justify-center items-center">Sport not supported.</div>
-            )}
-          </>
-        )}
-      </div>
+    <div className="flex flex-col w-full p-4">
+      <Hero
+        heading="Sports props and matchups all in one convenient location"
+        description="Find player props, stats as well as current matchups for NBA, NFL and NHL."
+        buttons={[{ name: 'nba', path:'/NBA'}, { name: 'nfl', path:'/NFL'}]}
+      />
     </div>
   );
 }

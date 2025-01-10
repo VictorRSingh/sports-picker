@@ -17,17 +17,17 @@ import React from "react";
 
 interface NFLStatisticsProps {
   gameLogs: GameLog[];
-  playerObject: Player;
+  player: Player;
 }
 
 const NFLStatistics: React.FC<NFLStatisticsProps> = ({
   gameLogs,
-  playerObject,
+  player,
 }) => {
   return (
     <>
       <div>
-        {playerObject.position === "QUARTERBACK" ? (
+        {player.position === "QUARTERBACK" ? (
           <>
             <h1>
               Passing Yards Average:{" "}
@@ -42,7 +42,7 @@ const NFLStatistics: React.FC<NFLStatisticsProps> = ({
               {getQuarterbackRushingYardsAverage(gameLogs).toFixed(1)}
             </h1>
           </>
-        ) : playerObject.position === "RUNNING BACK" ? (
+        ) : player.position === "RUNNING BACK" ? (
           <>
             <h1>
               Rushing Attempts Average:{" "}
@@ -57,7 +57,7 @@ const NFLStatistics: React.FC<NFLStatisticsProps> = ({
               {getRunningBackRushingYardsAttemptAverage(gameLogs).toFixed(1)}
             </h1>
           </>
-        ) : playerObject.position === "WIDE RECEIVER" ? (
+        ) : player.position === "WIDE RECEIVER" ? (
           <>
             <h1>
               Receptions Average:{" "}
@@ -72,7 +72,7 @@ const NFLStatistics: React.FC<NFLStatisticsProps> = ({
               {getWideReceiverReceivingTouchdownsAverage(gameLogs).toFixed(1)}
             </h1>
           </>
-        ) : playerObject.position === "TIGHT END" ? (
+        ) : player.position === "TIGHT END" ? (
           <>
             <h1>
               Receptions Average:{" "}
