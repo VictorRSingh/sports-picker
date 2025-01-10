@@ -1,4 +1,5 @@
 import { GameLog } from "@/interfaces/GameLog";
+import { calculateDeviation } from "@/utils/statistics/nba/calculateDeviation";
 import {
   getPlayerAssistsAverage,
   getPlayerPointAverage,

@@ -28,9 +28,10 @@ interface PlayerGraphProps {
   overUnder?: number;
   average?: number;
   prediction?: number;
+  deviation?: number;
 }
 
-const PlayerGraph: React.FC<PlayerGraphProps> = ({ gamelog, statistic, overUnder, average, prediction }) => {
+const PlayerGraph: React.FC<PlayerGraphProps> = ({ gamelog, statistic, overUnder, average, prediction, deviation }) => {
   const labels = gamelog.map((game) => game.opposition);
   const dataValues = gamelog.map((game) => game[statistic]);
 
@@ -62,6 +63,22 @@ const PlayerGraph: React.FC<PlayerGraphProps> = ({ gamelog, statistic, overUnder
         borderWidth: 3,
         tension: 0, // Straight line
       },
+      {
+        label: 'Deviation',
+        data: Array(labels.length).fill(deviation),
+        borderColor: "rgba(255, 0, 255, 1)", // Purple line
+        backgroundColor: "rgba(255, 99, 132, 0.2)",
+        borderWidth: 3,
+        tension: 0, // Straight line
+      },
+      // {
+      //   label: 'Deviation Overs',
+      //   data: Array(labels.length).fill((deviation ?? 0) + (average ?? 0)),
+      //   borderColor: "rgba(255, 0, 255, 1)", // Purple line
+      //   backgroundColor: "rgba(255, 99, 132, 0.2)",
+      //   borderWidth: 3,
+      //   tension: 0, // Straight line
+      // },
     ],
   };
 

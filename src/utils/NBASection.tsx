@@ -8,6 +8,7 @@ interface NBAProps {
   overUnder: { points?: number; rebounds?: number; assists?: number };
   setOverUnder: React.Dispatch<React.SetStateAction<any>>;
   average: { points?: number; rebounds?: number; assists?: number };
+  deviation: { points?: number; rebounds?: number; assists?: number };
 }
 
 export const NBASection: React.FC<NBAProps> = ({
@@ -15,6 +16,7 @@ export const NBASection: React.FC<NBAProps> = ({
   overUnder,
   setOverUnder,
   average,
+  deviation,
 }) => {
   // Explicitly list the keys
   const stats: (keyof GameLog)[] = ["points", "rebounds", "assists"];
@@ -44,6 +46,7 @@ export const NBASection: React.FC<NBAProps> = ({
               overUnder={overUnder[stat as keyof typeof overUnder]}
               average={average[stat as keyof typeof average]}
               prediction={predictedPoints}
+              deviation={deviation[stat as keyof typeof deviation]}
             />
           </div>
         </div>

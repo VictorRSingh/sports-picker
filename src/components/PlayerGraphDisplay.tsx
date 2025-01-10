@@ -21,12 +21,14 @@ import {
 } from "@/utils/statistics/nfl/getPlayerAverages";
 import { Player } from "@/interfaces/Player";
 import { GameLog } from "@/interfaces/GameLog";
+import { calculateDeviation } from "@/utils/statistics/nba/calculateDeviation";
 
 interface PlayerGraphDisplayProps {
     player: Player | null;
     gameLogs: GameLog[];
 }
 const PlayerGraphDisplay = ({ player, gameLogs}: PlayerGraphDisplayProps) => {
+  console.log(gameLogs);
     const [overUnder, setOverUnder] = useState({
         nba: {
           points: undefined,
@@ -52,6 +54,7 @@ const PlayerGraphDisplay = ({ player, gameLogs}: PlayerGraphDisplayProps) => {
           tightEnd: { receptions: undefined, receivingYards: undefined },
         },
       });
+            
   return (
     <div>
       {player && player.sport === "nba" ? (
@@ -64,6 +67,23 @@ const PlayerGraphDisplay = ({ player, gameLogs}: PlayerGraphDisplayProps) => {
               points: getPlayerPointAverage(gameLogs),
               rebounds: getPlayerReboundAverage(gameLogs),
               assists: getPlayerAssistsAverage(gameLogs),
+            }}
+            deviation={{
+              points: calculateDeviation(
+                gameLogs
+                  .map((log) => log.points) // Extract points
+                  .filter((point): point is number => point !== undefined) // Remove undefined values
+              ),
+              assists: calculateDeviation(
+                gameLogs
+                  .map((log) => log.assists) // Extract points
+                  .filter((assist): assist is number => assist !== undefined) // Remove undefined values
+              ),
+              rebounds: calculateDeviation(
+                gameLogs
+                  .map((log) => log.rebounds) // Extract points
+                  .filter((rebound): rebound is number => rebound !== undefined) // Remove undefined values
+              )
             }}
           />
         </>

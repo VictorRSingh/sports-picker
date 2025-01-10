@@ -24,7 +24,7 @@ const PlayerGameData = ({ player, gameLogs, setGameLogs}: PlayerGameLogsProps) =
     <div className="p-4 flex flex-col">
       {gameLogs.length} Games found for {player && player.name}
       <PlayerGameLogs player={player} gameLogs={gameLogs} />
-      <PlayerGraphDisplay player={player} gameLogs={gameLogs} />
+      <PlayerGraphDisplay player={player} gameLogs={[...gameLogs].reverse()} />
     </div>
   );
 };
