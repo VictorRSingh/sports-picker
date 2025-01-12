@@ -10,41 +10,21 @@ export async function GET(request: NextRequest ) {
 
     const response = await axios.get(searchURL);
     const data = await response.data;
-    const foundPlayer = data.results.find((item: any) => item.title === "PLAYERS").components[0].model;
+    const players = data.results.find((category: any) => category.title === 'PLAYERS')?.components ?? [];
 
+    const playersArray: Player[] = players.map((player: any) => {
+      const p: Player = {
+        contentUri: player.model.contentUri,
+        image: player.model.image.url,
+        name: player.model.title,
+        sport: player.model.webUrl.split('/')[1], 
+        position: "",
+        team: player.model.subtitle,
+        webUrl: player.model.webUrl
+      }
 
-    const playerObject: Player = {
-        contentUri: foundPlayer.contentUri,
-        image: foundPlayer.image.url,
-        name: foundPlayer.title,
-        team: foundPlayer.subtitle,
-        webUrl: foundPlayer.webUrl,
-        position: await getPlayerPosition(foundPlayer.webUrl) as string,
-        sport: await getPlayerSport(foundPlayer.webUrl) as string
-    }
-    return NextResponse.json(playerObject);
+      return p;
+    });
+
+    return NextResponse.json(playersArray);
 }
-
-const getPlayerPosition = async (playerUrl: string) => {
-    try {
-      // Fetch the player's page
-      const positionResponse = await axios.get(`https://www.foxsports.com/${playerUrl}`);
-      const positionData = positionResponse.data;
-  
-      // Load the HTML into Cheerio
-      const $ = cheerio.load(positionData);
-  
-      // Select the element containing the position (e.g., SMALL FORWARD)
-      const position = $('.entity-header .entity-title span').text().trim();
-      // Extract only the position part from the text
-      const positionMatch = position.match(/- (.+?) -/);
-      return positionMatch ? positionMatch[1] : null;
-    } catch (error) {
-      console.error('Error fetching player position:', error);
-      return null;
-    }
-  };
-
-  const getPlayerSport = async (playerUrl: string) => {
-    return playerUrl.includes('nba') ? 'nba' : playerUrl.includes('nfl') ? 'nfl' : playerUrl.includes('nhl') ? 'nhl' : 'nosport';
-  }

@@ -15,7 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`antialiased h-full w-full`}>
-        <div className="max-h-20 w-full sticky top-0">
+        <div className="max-h-20 w-full sticky top-0 bg-black border-b border-gray-100/80">
           <Navbar />
         </div>
         <div className="flex flex-grow h-[calc(100vh_-_80px)] w-full">{children}</div>

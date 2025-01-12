@@ -1,40 +1,30 @@
 import { DEBUG } from "@/config";
 import { GameLog } from "@/interfaces/GameLog";
-import { Player } from "@/interfaces/Player";
 import axios from "axios";
-import React, { Dispatch, SetStateAction, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 
-const useGameLog = (
-  player: Player | null,
-  gameLogs: GameLog[],
-  setGameLogs: Dispatch<SetStateAction<GameLog[]>>
-) => {
-  const webUrl = player ? player.webUrl : null;
+const useGameLog = (player: string | null) => {
+  const [gameLogs, setGameLogs] = useState<GameLog>();
 
-  const searchLink = `${
-    DEBUG
-    ? "http://localhost:3000/sportsPicker"
-    : "https://victorsingh.ca/sportsPicker"
-  }/api/foxsports/player/gamelogs?webUrl=${webUrl}`;
+  useEffect(() => {
+    if (!player) return;
 
-  const fetchGameLog = async () => {
-    if (webUrl) {
+    const fetchGameLog = async () => {
+      const searchLink = `/api/foxsports/player/gamelogs?webUrl=${player}`;
+      console.log(searchLink);
+    
       try {
         const response = await axios.get(searchLink);
-        const data = await response.data;
-  
-        // Avoid unnecessary state updates
-        if (JSON.stringify(data) !== JSON.stringify(gameLogs)) {
-          setGameLogs(data);
-        }
+        setGameLogs(response.data);
       } catch (error) {
-        console.error("Error fetching game log:", error);
+        console.error("Error fetching game log", error);
       }
     }
-  };
-  
 
-  return { fetchGameLog };
+    fetchGameLog();
+  }, [player]);
+
+  return { gameLogs };
 };
 
 export default useGameLog;

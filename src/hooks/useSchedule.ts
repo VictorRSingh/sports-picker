@@ -9,11 +9,7 @@ const useSchedule = (sport: string, formattedDate: string) => {
   const [schedule, setSchedule] = useState<Schedule>();
 
   const fetchSchedule = async () => {
-    const apiRoute = `${
-      DEBUG
-        ? "http://localhost:3000/sportsPicker"
-        : "https://victorsingh.ca/sportsPicker"
-    }/api/foxsports/schedule?sport=${sport}&date=${formattedDate}`;
+    const apiRoute = `/api/foxsports/schedule?sport=${sport}&date=${formattedDate}`;
 
     try {
       const response = await axios.get(apiRoute);

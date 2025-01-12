@@ -1,5 +1,5 @@
-import { OverUnderInput } from "@/components/PlayerGameLogs/OverUnderInput";
-import PlayerGraphs from "@/components/PlayerGraphs";
+import { OverUnderInput } from "@/components/player/PlayerGameLogs/OverUnderInput";
+import PlayerGraphs from "@/components/player/PlayerGraphs";
 import { GameLog } from "@/interfaces/GameLog";
 
 interface NFLProps {
