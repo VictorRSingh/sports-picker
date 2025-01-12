@@ -1,10 +1,5 @@
 "use client";
-
-import PlayerGameData from "@/components/player/PlayerGameData";
-import PlayerGraphStatistics from "@/components/player/PlayerGraphStatistics";
 import PlayerSearch from "@/components/player/PlayerSearch";
-import PlayerView from "@/components/player/PlayerView";
-import { GameLog } from "@/interfaces/GameLog";
 import { Player } from "@/interfaces/Player";
 import React, { useEffect, useState } from "react";
 import PlayerSearchButton from "@/components/player/PlayerSearchButton";
