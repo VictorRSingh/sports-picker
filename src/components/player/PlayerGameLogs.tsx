@@ -8,9 +8,9 @@ interface PlayerGameLogsProps {
 }
 const PlayerGameLogs = ({ gameLogs, filters }: PlayerGameLogsProps) => {
   return (
-<div className="overflow-x-auto max-w-full h-1/2">
+<div className="overflow-x-auto max-w-full h-fit min-h-40">
   <div className="w-full">
-    {`Showing ${filters.dataSetSize} games for player`}
+    {`Showing ${filters.dataSetSize === 0 ? gameLogs.rows.length : filters.dataSetSize} games for player`}
     <table className="w-full border-collapse border">
       <thead>
         <tr>
