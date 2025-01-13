@@ -12,11 +12,10 @@ interface FilterProps {
 
 const Filter = ({ filters, setFilters, filterName, filterConditions, target }: FilterProps) => {
     const handleChange =  (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const value = e.target.value;
         setFilters({
             ...filters,
-            [target]: typeof filters[target as keyof Filters] === 'number' 
-                ? parseInt(e.target.value, 10)
-                : e.target.value,
+            [target]: typeof filters[target] === 'number' ? parseInt(value, 10): value
         });
         
     }
