@@ -128,7 +128,7 @@ const PlayerGraphView = ({ gameLogs, filters }: PlayerGraphViewProps) => {
   return (
     <div className="w-full">
       <div className="flex justify-between items-center gap-x-4">
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-y-2">
           <label htmlFor="select">Select Stat to Graph</label>
           <select
             value={selectedStat}
@@ -149,7 +149,7 @@ const PlayerGraphView = ({ gameLogs, filters }: PlayerGraphViewProps) => {
           </p>
           <p>Player Average: {playerAverage.toFixed(2)}</p>
         </div>
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-y-2">
           <label htmlFor="slider">O/U Line {`(${overUnder})`}</label>
           <input
             type="range"
@@ -160,6 +160,7 @@ const PlayerGraphView = ({ gameLogs, filters }: PlayerGraphViewProps) => {
             onChange={(e) => setOverUnder(Number(e.target.value))}
             step={0.5}
           />
+          <input type="number" value={overUnder} onChange={(e) => setOverUnder(Number(e.target.value))} className="text-black" />
         </div>
       </div>
       {selectedStat && (
