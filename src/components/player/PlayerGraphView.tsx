@@ -37,6 +37,7 @@ const PlayerGraphView = ({ gameLogs, filters }: PlayerGraphViewProps) => {
   const [playerAverage, setPlayerAverage] = useState<number>(0);
   const [columnData, setColumnData] = useState<number[]>([]);
 
+  // Update `columnData` based on the selectedStat
   useEffect(() => {
     setColumnData(
       gameLogs.rows
@@ -47,17 +48,22 @@ const PlayerGraphView = ({ gameLogs, filters }: PlayerGraphViewProps) => {
         )
         .flat()
     );
-  }, [selectedStat]);
+  }, [selectedStat, gameLogs.rows]);
 
+  // Update playerAverage whenever columnData changes
   useEffect(() => {
-    setPlayerAverage(
-      columnData.reduce((total, num) => total + num, 0) / columnData.length
-    );
+    if (columnData.length > 0) {
+      setPlayerAverage(
+        columnData.reduce((total, num) => total + num, 0) / columnData.length
+      );
+    } else {
+      setPlayerAverage(0);
+    }
   }, [columnData]);
 
   const labels = gameLogs.rows.map((row) => row.columns[0].text.split(" ")[0]);
 
-  // Calculate hits
+  // Calculate hits and percentage based on filtered columnData
   const hits = columnData.filter((value) => value >= overUnder).length;
   const hitPercentage =
     columnData.length > 0
@@ -120,7 +126,7 @@ const PlayerGraphView = ({ gameLogs, filters }: PlayerGraphViewProps) => {
   };
 
   return (
-    <div className="">
+    <div className="w-full">
       <div className="flex justify-between items-center gap-x-4">
         <div className="flex flex-col">
           <label htmlFor="select">Select Stat to Graph</label>
@@ -137,7 +143,7 @@ const PlayerGraphView = ({ gameLogs, filters }: PlayerGraphViewProps) => {
             ))}
           </select>
         </div>
-        <div className="">
+        <div>
           <p>
             Current Line Hits: {hits} {`(${hitPercentage}%)`}
           </p>
