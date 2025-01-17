@@ -1,11 +1,11 @@
-import { Link } from "@/interfaces/ILink";
+import { ILink } from "@/interfaces/ILink";
 import React from "react";
 import { useRouter } from "next/navigation";
 
 interface HeroProps {
   heading: string;
   description: string;
-  buttons?: Link[];
+  buttons?: ILink[];
 }
 
 const Hero = ({ heading, description, buttons }: HeroProps) => {
