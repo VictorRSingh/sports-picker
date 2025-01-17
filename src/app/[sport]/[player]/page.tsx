@@ -31,7 +31,7 @@ const PlayerPage = () => {
   return (
     <>
       {player && (
-        <div className="flex flex-col gap-y-4 w-full lg mx-40">
+        <div className="flex flex-col gap-y-4 w-full lg:mx-40">
           <PlayerSubNav activeTab={activeTab} setActiveTab={setActiveTab} />
           <PlayerHeader player={player} />
           {renderContent()}
