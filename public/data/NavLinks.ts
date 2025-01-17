@@ -1,21 +1,20 @@
-import { Link } from "@/interfaces/Link";
-import { DEBUG } from "@/config";
+import { ILink } from "@/interfaces/ILink";
 
-export const Links: Link[] = [
+export const Links: ILink[] = [
   {
     name: "Home",
     path: "/",
   },
   {
     name: "NBA",
-    path: "/NBA"
+    path: "/nba"
   },
   {
     name: "NFL",
-    path: "/NFL",
+    path: "/nfl",
   },
   {
-    name: "Search",
-    path: "/search",
+    name: "NHL",
+    path: "/nhl",
   },
 ];

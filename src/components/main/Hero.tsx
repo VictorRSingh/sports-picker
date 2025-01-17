@@ -1,4 +1,4 @@
-import { Link } from "@/interfaces/Link";
+import { Link } from "@/interfaces/ILink";
 import React from "react";
 import { useRouter } from "next/navigation";
 

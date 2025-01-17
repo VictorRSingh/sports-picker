@@ -1,16 +1,17 @@
 "use client";
 
-import React, { useEffect } from 'react'
-import { useRouter } from 'next/navigation' 
+import MatchupSheet from "@/components/matchups/MatchupSheet";
+import { useMatchup } from "@/hooks/useMatchup";
+import React from "react";
+
 const NBA = () => {
-    const router = useRouter();
+  const { matchups } = useMatchup("nba");
 
-    useEffect(() => {
-        router.push('/NBA/schedule')
-    }, [])
   return (
-    <div>Rerouting</div>
-  )
-}
+    <div className="flex w-full h-full">
+      <MatchupSheet matchups={matchups} />
+    </div>
+  );
+};
 
-export default NBA
+export default NBA;

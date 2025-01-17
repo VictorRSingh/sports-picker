@@ -18,7 +18,7 @@ export default function RootLayout({
         <div className="max-h-20 w-full sticky top-0 bg-black border-b border-gray-100/80">
           <Navbar />
         </div>
-        <div className="flex flex-grow h-[calc(100vh_-_80px)] w-full">{children}</div>
+        <div className="flex flex-grow h-[calc(100vh_-_80px)] w-full p-4">{children}</div>
       </body>
     </html>
   );
