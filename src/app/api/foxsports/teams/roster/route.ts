@@ -47,19 +47,21 @@ export async function GET(request: NextRequest) {
 
           const player: Player = {
             name: cells[0].split("#")[0],
-            number: Number(cells[0].split("#")[1]),
-            position: positionFull,
             image: imgSrc,
-            webUrl:playerHref
+            webUrl: playerHref,
+            details: {
+              number: Number(cells[0].split("#")[1]),
+              position: positionFull,
+            },
           };
 
-          roster.players.push(player)
+          roster.players.push(player);
         }
       });
 
-      roster.playerCount = roster.players.length;
+    roster.playerCount = roster.players.length;
 
-    return NextResponse.json({ roster: roster});
+    return NextResponse.json({ roster: roster });
   } catch (error) {
     console.error("Failed to fetch roster", error);
     return NextResponse.json({ message: "Failed to fetch roster" });
