@@ -6,11 +6,12 @@ import React from "react";
 
 interface PlayerGameLogsProps {
   player: Player;
+  gameLogs: Gamelog;
 }
-const PlayerGameLogs = ({ player }: PlayerGameLogsProps) => {
-  const { gameLogs } = useGameLog(player);
+const PlayerGameLogs = ({ player, gameLogs }: PlayerGameLogsProps) => {
+
   return (
-    <div className="overflow-x-auto h-full">
+    <div className="">
       {gameLogs && (
         <div className="w-full">
           <table className="w-full border-collapse border">
