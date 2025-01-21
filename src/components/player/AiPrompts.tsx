@@ -70,7 +70,7 @@ const AiPrompts = ({ gameLogs, player }: AiPromptsProps) => {
                 >
                   <h1 className="text-xs font-semibold">{stat.statName}</h1>
                   <div className="flex items-center gap-x-4">
-                    <h1 className="text-5xl">{stat.projectedValue}</h1>
+                    <h1 className="text-5xl">{stat.projectedValue.toFixed(1)}</h1>
                   </div>
                 </div>
               )
