@@ -31,7 +31,7 @@ const PlayerPage = () => {
         case "analytics":
           return <PlayerGraph gameLogs={gameLogs} selectedStat={selectedStat} setSelectedStat={setSelectedStat}/>;
         case "ai":
-          return <AiPrompts />
+          return <AiPrompts gameLogs={gameLogs} player={player} />
         default:
           return null;
       }

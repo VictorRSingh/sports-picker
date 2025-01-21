@@ -10,6 +10,7 @@
     "start:prod": "sudo npm i && sudo npm run build && sudo npx next start -p 3003"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.21.0",
     "@tensorflow/tfjs": "^4.22.0",
     "axios": "^1.7.9",
     "chart.js": "^4.4.7",

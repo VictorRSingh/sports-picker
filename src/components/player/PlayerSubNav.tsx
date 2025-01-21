@@ -43,7 +43,7 @@ const PlayerSubNav: React.FC<PlayerSubNavProps> = ({
         }`}
         onClick={() => setActiveTab("ai")}
       >
-        Ai Prompts
+        Ai Projections
       </button>
     </div>
   );

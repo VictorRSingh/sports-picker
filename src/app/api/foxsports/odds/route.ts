@@ -17,53 +17,6 @@ export async function GET(request: NextRequest) {
 
     const games: Game[] = [];
 
-    // $(".right-column").each((_, game) => {
-    // const rows: string[][] = [];
-    //   let gameUrl;
-    //   // Collect all rows in a game
-    //   $(game)
-    //     .find("a .odds-sp-content .sp-rows")
-    //     .each((_, row) => {
-    //       const cells = $(row)
-    //         .find("div")
-    //         .map((index, cell) => $(cell).text().trim())
-    //         .get();
-
-    //       // Filter only the desired indices (1, 3, 4, 5)
-    //       const filteredCells = cells.filter((_, index) =>
-    //         [2, 3, 4, 5, 6].includes(index)
-    //       );
-    //       rows.push(filteredCells); // Push filtered data into rows array
-    //     });
-
-    // // Group rows into games (home and away)
-    // for (let i = 0; i < rows.length; i += 2) {
-    //   const awayRow = rows[i];
-    //   const homeRow = rows[i + 1];
-
-    //   if (homeRow && awayRow && gameUrl) {
-    //       const game: Game = {
-    //         gameUrl: gameUrl,
-    //           away: {
-    //               team: awayRow[0],
-    //               short: awayRow[1],
-    //               spread: awayRow[2],
-    //               moneyline: awayRow[3],
-    //               total: awayRow[4]
-    //           },
-    //           home: {
-    //             team: homeRow[0],
-    //             short: homeRow[1],
-    //             spread: homeRow[2],
-    //             moneyline: homeRow[3],
-    //             total: homeRow[4]
-    //           }
-    //       }
-    //     games.push(game);
-    //   }
-    //   }
-    // });
-
     $(".right-column")
       .find("a")
       .each((_, game) => {
