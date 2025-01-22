@@ -10,6 +10,7 @@ import PlayerHeader from "@/components/player/PlayerHeader";
 import { useGameLog } from "@/hooks/useGameLog";
 import PlayerGraph from "@/components/player/PlayerGraph";
 import AiPrompts from "@/components/player/AiPrompts";
+import { useTeam } from "@/hooks/useTeams";
 
 type Tab = "stats" | "gamelog" | "analytics" | "ai"; // Matches PlayerSubNavProps
 

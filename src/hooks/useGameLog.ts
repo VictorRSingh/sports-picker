@@ -16,7 +16,6 @@ export function useGameLog(player: Player) {
             const data = await response.data;
 
             if(data) {
-                console.log("Gamelog", data);
                 setGameLog(data);
             }
 
