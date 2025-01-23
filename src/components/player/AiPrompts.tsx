@@ -58,7 +58,7 @@ const AiPrompts = ({ gameLogs, player }: AiPromptsProps) => {
   
   Using this data:
   1. Provide predictions or projections for the player's future performance ${
-    selectedTeam && `against the ${selectedTeam.name}`
+    selectedTeam && `giving more weight to their recent performances and consistency against the ${selectedTeam.name}`
   }.
   2. Return the data in a JSON format with this structure:
      [
@@ -165,7 +165,7 @@ const AiPrompts = ({ gameLogs, player }: AiPromptsProps) => {
                         showInfo[stat.statName] ? "flex" : "hidden"
                       } h-full justify-between items-center overflow-y-auto max-h-12 bg-neutral-800 rounded w-full text-xs`}
                     >
-                      <p className="h-full flex">{stat.opposingTeamsDefense}</p>
+                      <p className="h-full flex p-2 m-2">{stat.opposingTeamsDefense}</p>
                       <button onClick={() => toggleInfo(stat.statName)}>
                         <MdOutlineInfo className="text-3xl" />
                       </button>
