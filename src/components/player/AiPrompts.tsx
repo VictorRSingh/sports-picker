@@ -98,21 +98,24 @@ const AiPrompts = ({ gameLogs, player }: AiPromptsProps) => {
 
   useEffect(() => {
     const fetchData = async () => {
-
-      if(selectedTeam) {
-        await fetchTeamStats(selectedTeam.sport);
-      }
-
-      if (teamStats) {
-        setResponse(undefined);
-        await fetchAiResponse();
+      if (selectedTeam) {
+        await fetchTeamStats(selectedTeam.sport); // Fetch the team stats
       }
     };
-    
-    if (selectedTeam) {
-      fetchData();
-    }
+  
+    fetchData();
   }, [selectedTeam]);
+  
+  useEffect(() => {
+    const processStats = async () => {
+      if (teamStats) {
+        setResponse(undefined); // Clear the previous response
+        await fetchAiResponse(); // Fetch the AI response based on the updated teamStats
+      }
+    };
+  
+    processStats();
+  }, [teamStats]);
 
   const toggleInfo = (statName: string) => {
     setShowInfo((prev) => ({
