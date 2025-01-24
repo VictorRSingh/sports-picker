@@ -18,8 +18,8 @@ const SearchBar = () => {
   }, [query]);
 
   return (
-    <div className="flex w-full md:w-fit justify-end">
-      <div className="flex md:hidden text-2xl px-4">
+    <div className="flex w-full justify-end">
+      <div className="flex lg:hidden text-2xl px-4">
         {showSearch ? (
           <MdOutlineClose onClick={() => {
             setShowSearch(!showSearch)
@@ -40,7 +40,7 @@ const SearchBar = () => {
           </div>
         )}
       </div>
-      <div className="hidden md:flex text-xl px-4 gap-x-2 items-center">
+      <div className="hidden lg:flex text-xl px-4 gap-x-2 items-center w-full">
         <SearchField
           query={query}
           searchResults={searchResults!}

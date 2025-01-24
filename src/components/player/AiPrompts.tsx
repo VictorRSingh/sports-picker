@@ -8,6 +8,8 @@ import { usePathname } from "next/navigation";
 import { Team } from "@/types/Team";
 import { useTeamStats } from "@/hooks/useTeamStats";
 import { MdOutlineInfo } from "react-icons/md";
+import { BettingStyleEnum } from "@/enums/BettingStyleEnum";
+import PlayerProjections from "./PlayerProjections";
 
 interface AiPromptsProps {
   gameLogs: Gamelog;
@@ -24,6 +26,8 @@ const AiPrompts = ({ gameLogs, player }: AiPromptsProps) => {
     sport: "",
     webUrl: "",
   });
+  const [selectedBettingStyle, setSelectedBettingStyle] =
+    useState<BettingStyleEnum>(BettingStyleEnum.normal);
 
   const [showInfo, setShowInfo] = useState<Record<string, boolean>>({});
 
@@ -35,43 +39,84 @@ const AiPrompts = ({ gameLogs, player }: AiPromptsProps) => {
   const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
 
   const prompt = `
-  Here is the gamelog data for ${player.name}:
-  ${JSON.stringify(gameLogs)}
-
+  Analyze sports betting opportunities for ${
+    player.name
+  } using the following structured data:
+  
+  [PLAYER CONTEXT]
+  Recent Performance:
+  ${JSON.stringify(gameLogs.rows || [])}
+  
   ${
-    selectedTeam.name !== ""
-      ? `${player.name} is going up against ${
-          selectedTeam.name
-        }, here is the defensive stats for ${selectedTeam.name}:
-    
-    ${JSON.stringify(
-      teamStats && teamStats.headers.columns
-    )} \n\n ${JSON.stringify(
-          teamStats?.rows.find((team) =>
-            team.columns[0].text.includes(selectedTeam.name)
-          )
-        )}
-    `
+    selectedTeam.name
+      ? `[MATCHUP CONTEXT]
+  Opposing Team (${selectedTeam.name}) Defense:
+  Headers: ${JSON.stringify(teamStats?.headers?.columns || [])}
+  Stats: ${JSON.stringify(
+    teamStats?.rows?.find((team) =>
+      team.columns[0]?.text?.includes(selectedTeam.name)
+    )?.columns || []
+  )}
+  `
       : ""
   }
-
   
-  Using this data:
-  1. Provide predictions or projections for the player's future performance ${
-    selectedTeam && `giving more weight to their recent performances and consistency against the ${selectedTeam.name}`
-  }.
-  2. Return the data in a JSON format with this structure:
-     [
-         {
-             "statName": "Stat Name",
-             "projectedValue": Numeric Value,
-             "opposingTeamName": "Opposing Team name if applicable",
-             "opposingTeamsDefense": "Your Take on the opposing teams defense, if there is one, and why you think the player will achieve the projected stats",
-         }
-     ]
-  3. Ensure each stat is listed as a separate object in the array.
-  4. Ensure that projectedValue is not in a string form such at '7/18' or '3/9', if it is a string, you should turn that value into a number
-  5. Do not include any additional text or explanation outside the JSON.
+  [BETTING CONTEXT]
+  Wagering Style: ${selectedBettingStyle}
+  (${
+    selectedBettingStyle === "Aggressive"
+      ? "Emphasize 90th percentile outcomes with high variance tolerance"
+      : selectedBettingStyle === "Normal"
+      ? "Balance median expectations with moderate variance buffers"
+      : "Prioritize 25th percentile floor projections with maximum risk mitigation"
+  })
+  
+  Generate projections following these rules:
+  1. Convert fractional stats to numeric values
+  2. Weight factors:
+     - Recent form (40%)
+     - Season averages (30%)
+     - Matchup defense (20%)
+     - Betting style (10%)
+  3. Style adjustment: ${
+    selectedBettingStyle === "Aggressive"
+      ? "Add 15% to 90th percentile outcomes"
+      : selectedBettingStyle === "Normal"
+      ? "Use median values ±5% variance"
+      : "Use 25th percentile floor + 10% buffer"
+  }
+  
+  Required JSON response format:
+  {
+    "projections": [
+      {
+        "stat": "Stat Name",
+        "projection": 28.9,
+        "confidence": 72,
+        "matchupLeverage": "Opponent allows ...",
+        "trend": "3-game increasing streak"
+      }
+    ],
+    "betRecommendations": [
+      {
+        "type": "${selectedBettingStyle}",
+        "market": "Player Stat Over or Under recommendation",
+        "edge": Calculated Edge depending on player over under line,
+        "rationale": "Explain Why you chose this"
+      }
+    ]
+  }
+  
+  Validation Rules:
+  - Numeric values only (no strings)
+  - Use exact column.text values from: ${JSON.stringify(
+    gameLogs.headers?.columns || []
+  )}
+  - Stat abbreviations from: ${JSON.stringify(
+    player.stats?.map((s) => s.abbr) || []
+  )}
+  - Max 5 projections
+  - No null/undefined values
   `;
 
   const fetchAiResponse = async () => {
@@ -95,17 +140,16 @@ const AiPrompts = ({ gameLogs, player }: AiPromptsProps) => {
     console.log(response);
   }, [response]);
 
-
   useEffect(() => {
     const fetchData = async () => {
       if (selectedTeam) {
         await fetchTeamStats(selectedTeam.sport); // Fetch the team stats
       }
     };
-  
+
     fetchData();
   }, [selectedTeam]);
-  
+
   useEffect(() => {
     const processStats = async () => {
       if (teamStats) {
@@ -113,9 +157,20 @@ const AiPrompts = ({ gameLogs, player }: AiPromptsProps) => {
         await fetchAiResponse(); // Fetch the AI response based on the updated teamStats
       }
     };
-  
+
     processStats();
   }, [teamStats]);
+
+  useEffect(() => {
+    const processStats = async () => {
+      if (selectedBettingStyle) {
+        setResponse(undefined); // Clear the previous response
+        await fetchAiResponse(); // Fetch the AI response based on the updated teamStats
+      }
+    };
+
+    processStats();
+  }, [selectedBettingStyle]);
 
   const toggleInfo = (statName: string) => {
     setShowInfo((prev) => ({
@@ -128,52 +183,23 @@ const AiPrompts = ({ gameLogs, player }: AiPromptsProps) => {
     <div className="">
       {teams && selectedTeam && setSelectedTeam && (
         <div className="flex flex-col md:flex-row gap-x-2">
-          <h1>{player.name} @ </h1>
           <AiPromptsFilter
             player={player}
             teams={teams}
             selectedTeam={selectedTeam}
             setSelectedTeam={setSelectedTeam}
+            selectedBettingStyle={selectedBettingStyle}
+            setSelectedBettingStyle={setSelectedBettingStyle}
           />
         </div>
       )}
 
-      {response !== undefined? (
+      {response !== undefined ? (
         <div className="">
           <div className="grid grid-cols-2 gap-4 items-center">
-            {response && response?.map(
-              (stat: {
-                statName: string;
-                projectedValue: number;
-                opposingteamName?: string;
-                opposingTeamsDefense: string;
-              }) => (
-                <div
-                  key={stat.statName + stat.projectedValue}
-                  className="flex flex-col p-4 border-b border-gray-700 col-span-full lg:col-span-1"
-                >
-                  <h1 className="text-xs font-semibold">{stat.statName}</h1>
-                  <div className="flex items-center justify-between gap-x-4 w-full relative">
-                    <h1 className="text-5xl flex-grow">
-                      {stat.projectedValue}
-                    </h1>
-                    <button onClick={() => toggleInfo(stat.statName)}>
-                      <MdOutlineInfo className="text-3xl" />
-                    </button>
-                    <div
-                      className={`absolute top-0 ${
-                        showInfo[stat.statName] ? "flex" : "hidden"
-                      } h-full justify-between items-center overflow-y-auto max-h-12 bg-neutral-800 rounded w-full text-xs`}
-                    >
-                      <p className="h-full flex p-2 m-2">{stat.opposingTeamsDefense}</p>
-                      <button onClick={() => toggleInfo(stat.statName)}>
-                        <MdOutlineInfo className="text-3xl" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )
-            )}
+            <div className="col-span-full mt-4">
+              {response && <PlayerProjections data={response} />}
+            </div>
           </div>
         </div>
       ) : (

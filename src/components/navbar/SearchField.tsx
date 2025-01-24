@@ -19,10 +19,10 @@ const SearchField = ({
   const router = useRouter();
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full mt-4 lg:mt-0">
       <input
         type="text"
-        className="bg-gray-600 rounded px-1 py-2 w-full"
+        className="bg-gray-600 rounded px-4 py-2 w-full"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search Players or Teams"
