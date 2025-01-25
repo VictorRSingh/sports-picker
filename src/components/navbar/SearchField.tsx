@@ -40,7 +40,7 @@ const SearchField = ({
                     onClick={() => {
                       setShowSearch(false);
                       setQuery("");
-                      router.push(player.webUrl);
+                      router.push(`/p/${player.webUrl}`);
                     }}
                   >
                     <img src={player.image} width={40} />
@@ -58,7 +58,7 @@ const SearchField = ({
                       onClick={() => {
                         setShowSearch(false);
                         setQuery("");
-                        router.push(team.webUrl);
+                        router.push(`/t/${team.webUrl}`);
                       }}
                     >
                       <img src={team.image} width={40} />
@@ -79,7 +79,7 @@ const SearchField = ({
                     onClick={() => {
                       setShowSearch(false);
                       setQuery("");
-                      router.push(team.webUrl);
+                      router.push(`/t/${team.webUrl}`);
                     }}
                   >
                     <img src={team.image} width={40} />
@@ -97,7 +97,7 @@ const SearchField = ({
                       onClick={() => {
                         setShowSearch(false);
                         setQuery("");
-                        router.push(player.webUrl);
+                        router.push(`/p/${player.webUrl}`);
                       }}
                     >
                       <img src={player.image} width={40} />

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { usePlayer } from "@/hooks/usePlayer";
 import PlayerStats from "@/components/player/PlayerStats";
@@ -10,14 +10,16 @@ import PlayerHeader from "@/components/player/PlayerHeader";
 import { useGameLog } from "@/hooks/useGameLog";
 import PlayerGraph from "@/components/player/PlayerGraph";
 import AiPrompts from "@/components/player/AiPrompts";
-import { useTeam } from "@/hooks/useTeams";
+import PlayerPropsPage from "@/components/player/PlayerProps";
+import { useProps } from "@/hooks/useProps";
 
-type Tab = "stats" | "gamelog" | "analytics" | "ai"; // Matches PlayerSubNavProps
+type Tab = "stats" | "gamelog" | "analytics" | "ai" | "props"; // Matches PlayerSubNavProps
 
 const PlayerPage = () => {
   const pathname = usePathname();
-  const { player } = usePlayer(pathname);
+  const { player } = usePlayer(pathname.replace("/p", ""));
   const { gameLogs } = useGameLog(player!);
+  const { playerProps, fetchPlayerProps } = useProps(player?.webUrl.replace("-player", "").replace("-", "+")!);
   const [activeTab, setActiveTab] = useState<Tab>("stats");
   // Default to the first numeric stat
   const [selectedStat, setSelectedStat] = useState<string>("");
@@ -32,12 +34,15 @@ const PlayerPage = () => {
         case "analytics":
           return <PlayerGraph gameLogs={gameLogs} selectedStat={selectedStat} setSelectedStat={setSelectedStat}/>;
         case "ai":
-          return <AiPrompts gameLogs={gameLogs} player={player} />
+          return <AiPrompts gameLogs={gameLogs} player={player} playerProps={playerProps} />
+        case "props": 
+          return <PlayerPropsPage playerProps={playerProps} />
         default:
           return null;
       }
     }
   };
+
 
   return (
     <>

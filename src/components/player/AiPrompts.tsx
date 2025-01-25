@@ -10,15 +10,17 @@ import { useTeamStats } from "@/hooks/useTeamStats";
 import { MdOutlineInfo } from "react-icons/md";
 import { BettingStyleEnum } from "@/enums/BettingStyleEnum";
 import PlayerProjections from "./PlayerProjections";
+import { PlayerProps } from "@/types/PlayerProps";
 
 interface AiPromptsProps {
   gameLogs: Gamelog;
   player: Player;
+  playerProps: PlayerProps[];
 }
 
-const AiPrompts = ({ gameLogs, player }: AiPromptsProps) => {
+const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
   const pathname = usePathname();
-  const { teams } = useTeam(pathname.split("/")[1]);
+  const { teams } = useTeam(pathname.replace("/p", "").split("/")[1]);
   const { teamStats, fetchTeamStats } = useTeamStats();
   const [selectedTeam, setSelectedTeam] = useState<Team>({
     name: "",
@@ -70,6 +72,9 @@ const AiPrompts = ({ gameLogs, player }: AiPromptsProps) => {
       ? "Balance median expectations with moderate variance buffers"
       : "Prioritize 25th percentile floor projections with maximum risk mitigation"
   })
+
+  [PLAYER PROP CONTEXT]
+  Player Props: ${JSON.stringify(playerProps || [])}
   
   Generate projections following these rules:
   1. Convert fractional stats to numeric values
@@ -85,6 +90,9 @@ const AiPrompts = ({ gameLogs, player }: AiPromptsProps) => {
       ? "Use median values ±5% variance"
       : "Use 25th percentile floor + 10% buffer"
   }
+  4. Be sure to include each stat in the betRecommendations, weather it be a bad bet or good bet and give your reasoning as well as either the positive or negative edge
+  5. Curate a list of props you think is good with a signifigant high context based on the wagering style
+  6. Create a betslip with high confidence props
   
   Required JSON response format:
   {
@@ -101,10 +109,25 @@ const AiPrompts = ({ gameLogs, player }: AiPromptsProps) => {
       {
         "type": "${selectedBettingStyle}",
         "market": "Player Stat Over or Under recommendation",
-        "edge": Calculated Edge depending on player over under line,
-        "rationale": "Explain Why you chose this"
+        "edge": Calculated Edge depending on player over under line, give it as either a LOW, MEDIUM, or HIGH value,
+        "rationale": "Explain Why you chose this, can you include a line for the Over/Under "
       }
-    ]
+    ],
+    "propsRecommendations: [
+      {
+        prop: "The market for the prop",
+        recommendation: "The recommended line to take either over or under",
+        "rationale": "Explain Why you chose this",
+        "confidence": 72,
+      }
+    ],    
+    "bettingSlipRecommendation": [
+        {
+          prop: "The Market for the prop",
+          recommendation: "The recommended line to take either over or under",
+          "confidence": 72,
+        }
+      ]
   }
   
   Validation Rules:

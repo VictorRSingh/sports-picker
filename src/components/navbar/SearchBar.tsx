@@ -16,6 +16,7 @@ const SearchBar = () => {
       fetchSearchResults();
     }
   }, [query]);
+  
 
   return (
     <div className="flex w-full justify-end">

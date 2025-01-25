@@ -1,8 +1,8 @@
 import React from "react";
 
 type PlayerSubNavProps = {
-  activeTab: "stats" | "gamelog" | "analytics" | "ai"; // Narrow down to "stats" and "gamelog"
-  setActiveTab: (tab: "stats" | "gamelog" | "analytics" | "ai") => void; // Narrow down as well
+  activeTab: "stats" | "gamelog" | "analytics" | "ai" | "props"; // Narrow down to "stats" and "gamelog"
+  setActiveTab: (tab: "stats" | "gamelog" | "analytics" | "ai" | "props") => void; // Narrow down as well
 };
 
 const PlayerSubNav: React.FC<PlayerSubNavProps> = ({
@@ -44,6 +44,14 @@ const PlayerSubNav: React.FC<PlayerSubNavProps> = ({
         onClick={() => setActiveTab("ai")}
       >
         Ai Projections
+      </button>
+      <button
+        className={`${buttonStyle} ${
+          activeTab === "props" ? buttonStyleActive  : ""
+        }`}
+        onClick={() => setActiveTab("props")}
+      >
+        Props
       </button>
     </div>
   );
