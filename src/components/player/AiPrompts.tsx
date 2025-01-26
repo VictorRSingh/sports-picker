@@ -41,107 +41,113 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
   const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
 
   const prompt = `
-  Analyze sports betting opportunities for ${
-    player.name
-  } using the following structured data:
+  Analyze sports betting opportunities for ${player.name} using the following structured data:
   
-  [PLAYER CONTEXT]
-  Recent Performance:
+  # Player Context
+  **Recent Performance:**
   ${JSON.stringify(gameLogs.rows || [])}
   
-  ${
-    selectedTeam.name
-      ? `[MATCHUP CONTEXT]
-  Opposing Team (${selectedTeam.name}) Defense:
-  Headers: ${JSON.stringify(teamStats?.headers?.columns || [])}
-  Stats: ${JSON.stringify(
-    teamStats?.rows?.find((team) =>
+  ${selectedTeam.name ? `
+  # Matchup Context
+  **Opposing Team (${selectedTeam.name}) Defense:**
+  - Headers: ${JSON.stringify(teamStats?.headers?.columns || [])}
+  - Stats: ${JSON.stringify(
+    teamStats?.rows?.find(team => 
       team.columns[0]?.text?.includes(selectedTeam.name)
     )?.columns || []
-  )}
-  `
-      : ""
+  )}` : ""}
+  
+  # Betting Context
+  **Wagering Style:** ${selectedBettingStyle}
+  ${
+    {
+      "Aggressive": "- Emphasize 90th percentile outcomes\\n- High variance tolerance\\n- +15% to upper projections",
+      "Normal": "- Balance median expectations\\n- ±5% variance buffer",
+      "Passive": "- 25th percentile floor projections\\n- +10% risk buffer",
+      "Watered": "- Alternate lines only\\n- 97-100% confidence required\\n- Create non-book lines when justified"
+    }[selectedBettingStyle]
   }
   
-  [BETTING CONTEXT]
-  Wagering Style: ${selectedBettingStyle}
-  (${
-    selectedBettingStyle === "Aggressive"
-      ? "Emphasize 90th percentile outcomes with high variance tolerance"
-      : selectedBettingStyle === "Normal"
-      ? "Balance median expectations with moderate variance buffers"
-      : "Prioritize 25th percentile floor projections with maximum risk mitigation"
-  })
-
-  [PLAYER PROP CONTEXT]
-  Player Props: ${JSON.stringify(playerProps || [])}
+  # Player Prop Context
+  ${JSON.stringify(playerProps || [])}
   
-  Generate projections following these rules:
-  1. Convert fractional stats to numeric values
-  2. Weight factors:
-     - Recent form (40%)
-     - Season averages (30%)
-     - Matchup defense (20%)
-     - Betting style (10%)
-  3. Style adjustment: ${
-    selectedBettingStyle === "Aggressive"
-      ? "Add 15% to 90th percentile outcomes"
-      : selectedBettingStyle === "Normal"
-      ? "Use median values ±5% variance"
-      : "Use 25th percentile floor + 10% buffer"
-  }
-  4. Be sure to include each stat in the betRecommendations, weather it be a bad bet or good bet and give your reasoning as well as either the positive or negative edge
-  5. Curate a list of props you think is good with a signifigant high context based on the wagering style
-  6. Create a betslip with high confidence props
+  ## Analysis Requirements
+  1. **Data Processing**
+     - Convert all fractional stats to decimals
+     - Use exact column values from: ${JSON.stringify(gameLogs.headers?.columns || [])}
+     - Validate stat abbreviations against: ${JSON.stringify(player.stats?.map(s => s.abbr) || [])}
   
-  Required JSON response format:
+  2. **Projection Weights**
+     - Recent Form: 40%
+     - Season Averages: 30%
+     - Matchup Defense: 20%
+     - Style Adjustment: 10%
+  
+  3. **Recommendation Rules**
+     - Include all props with edge analysis (positive/negative)
+     - Watered bets require 4+ props at 95-97% confidence
+     - Betslip must have ≥72% confidence
+     - Consider historical player-team dynamics
+  
+  ## Required Output Format
+  \\\`\\\`\\\`json
   {
     "projections": [
       {
-        "stat": "Stat Name",
+        "stat": "ValidStatAbbreviation",
         "projection": 28.9,
         "confidence": 72,
-        "matchupLeverage": "Opponent allows ...",
-        "trend": "3-game increasing streak"
+        "matchupLeverage": "Specific defensive weakness",
+        "trend": "3-game streak type"
       }
     ],
     "betRecommendations": [
       {
         "type": "${selectedBettingStyle}",
-        "market": "Player Stat Over or Under recommendation",
-        "edge": Calculated Edge depending on player over under line, give it as either a LOW, MEDIUM, or HIGH value,
-        "rationale": "Explain Why you chose this, can you include a line for the Over/Under "
+        "market": "Points Over/Under",
+        "edge": "HIGH",
+        "rationale": "Line-specific analysis with comparison"
       }
     ],
-    "propsRecommendations: [
+    "propsRecommendations": [
       {
-        prop: "The market for the prop",
-        recommendation: "The recommended line to take either over or under",
-        "rationale": "Explain Why you chose this",
-        "confidence": 72,
+        "prop": "Points",
+        "recommendation": "Over 27.5",
+        "rationale": "Trend vs defensive matchup",
+        "confidence": 85
       }
-    ],    
+    ],
     "bettingSlipRecommendation": [
-        {
-          prop: "The Market for the prop",
-          recommendation: "The recommended line to take either over or under",
-          "confidence": 72,
-        }
-      ]
+      {
+        "prop": "Rebounds",
+        "recommendation": "Under 8.5",
+        "confidence": 78,
+        "rationale": "Matchup-specific justification"
+      }
+    ],
+    "wateredBetRecommendation": [
+      {
+        "prop": "Assists",
+        "recommendation": "Over 4.5",
+        "confidence": 96,
+        "rationale": "High-volume trend analysis"
+      }
+    ]
   }
+  \\\`\\\`\\\`
   
-  Validation Rules:
-  - Numeric values only (no strings)
-  - Use exact column.text values from: ${JSON.stringify(
-    gameLogs.headers?.columns || []
-  )}
-  - Stat abbreviations from: ${JSON.stringify(
-    player.stats?.map((s) => s.abbr) || []
-  )}
-  - Max 5 projections
-  - No null/undefined values
+  **Validation Constraints:**
+  - Maximum 5 projections
+  - Numeric values only (no null/undefined)
+  - Watered bets require ≥4 recommendations
+  - Confidence ranges:
+    - Betslip: 70-100%
+    - Watered: 95-100%
+    - Regular: 50-94%
+  - Strict stat abbreviation adherence
   `;
 
+  
   const fetchAiResponse = async () => {
     console.log("Prompt", prompt);
     const result = await model.generateContent(prompt);

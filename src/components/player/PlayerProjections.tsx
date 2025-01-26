@@ -15,10 +15,23 @@ const PlayerProjections = (props: { data: any }) => {
         return "bg-blue-100 border-blue-300";
       case "Passive":
         return "bg-gray-100 border-gray-300";
+      case "Watered":
+        return "bg-gray-100 border-gray-300";
       default:
         return "bg-white";
     }
   };
+
+  const edgeColor = (edge: any) => {
+    switch (edge) {
+      case "LOW":
+        return "text-red-500";
+      case "MEDIUM":
+        return "text-yellow-500";
+      case "HIGH":
+        return "text-green-500"
+    }
+  }
 
   console.log(props.data);
 
@@ -86,8 +99,8 @@ const PlayerProjections = (props: { data: any }) => {
                         {bet.type}
                       </span>
                     </div>
-                    <span className="font-bold text-green-600">
-                      +{bet.edge} Edge
+                    <span className={`font-bold ${edgeColor(bet.edge)}`}>
+                      Edge: {bet.edge} 
                     </span>
                   </div>
                 </div>
@@ -121,13 +134,13 @@ const PlayerProjections = (props: { data: any }) => {
                       </span>
                     </div>
                     <div className="flex justify-end">
-                    <span
-                  className={`text-sm font-medium ${confidenceColor(
-                    bet.confidence
-                  )}`}
-                >
-                  {bet.confidence}% Confidence
-                </span>
+                      <span
+                        className={`text-sm font-medium ${confidenceColor(
+                          bet.confidence
+                        )}`}
+                      >
+                        {bet.confidence}% Confidence
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -144,36 +157,81 @@ const PlayerProjections = (props: { data: any }) => {
           Bet Slip Recommendations
         </h2>
         <div className="space-y-3">
-          {props.data.bettingSlipRecommendation.map((bet: any, index: number) => (
-            <div
-              key={index}
-              className={`p-4 rounded-lg border ${betTypeColor(bet.type)}`}
-            >
-              <div className="flex justify-between items-center mb-2">
-                <div className="flex items-center space-x-2 w-full justify-between">
-                  <span className="font-semibold text-gray-700 flex-grow">
-                    {bet.prop}
-                  </span>
-                  <div className="flex flex-col">
-                    <div className="flex justify-end">
-                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-600 text-white">
-                        {bet.recommendation}
-                      </span>
-                    </div>
-                    <div className="flex justify-end">
-                    <span
-                  className={`text-sm font-medium ${confidenceColor(
-                    bet.confidence
-                  )}`}
-                >
-                  {bet.confidence}% Confidence
-                </span>
+          {props.data.bettingSlipRecommendation.map(
+            (bet: any, index: number) => (
+              <div
+                key={index}
+                className={`p-4 rounded-lg border ${betTypeColor(bet.type)}`}
+              >
+                <div className="flex justify-between items-center mb-2">
+                  <div className="flex items-center space-x-2 w-full justify-between">
+                    <span className="font-semibold text-gray-700 flex-grow">
+                      {bet.prop}
+                    </span>
+                    <div className="flex flex-col">
+                      <div className="flex justify-end">
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-600 text-white">
+                          {bet.recommendation}
+                        </span>
+                      </div>
+                      <div className="flex justify-end">
+                        <span
+                          className={`text-sm font-medium ${confidenceColor(
+                            bet.confidence
+                          )}`}
+                        >
+                          {bet.confidence}% Confidence
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
+                <p className="text-sm text-gray-600">{bet.rationale}</p>
               </div>
-            </div>
-          ))}
+            )
+          )}
+        </div>
+      </div>
+
+      {/* Watered down Recommendations */}
+      <div>
+        <h2 className="text-2xl font-bold mb-4 text-gray-800">
+          Watered Recommendations
+        </h2>
+        <div className="space-y-3">
+          {props.data.wateredBetRecommendation.map(
+            (bet: any, index: number) => (
+              <div
+                key={index}
+                className={`p-4 rounded-lg border ${betTypeColor(bet.type)}`}
+              >
+                <div className="flex justify-between items-center mb-2">
+                  <div className="flex items-center space-x-2 w-full justify-between">
+                    <span className="font-semibold text-gray-700 flex-grow">
+                      {bet.prop}
+                    </span>
+                    <div className="flex flex-col">
+                      <div className="flex justify-end">
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-600 text-white">
+                          {bet.recommendation}
+                        </span>
+                      </div>
+                      <div className="flex justify-end">
+                        <span
+                          className={`text-sm font-medium ${confidenceColor(
+                            bet.confidence
+                          )}`}
+                        >
+                          {bet.confidence}% Confidence
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-600">{bet.rationale}</p>
+              </div>
+            )
+          )}
         </div>
       </div>
     </div>

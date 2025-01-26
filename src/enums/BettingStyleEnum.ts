@@ -1,5 +1,6 @@
 export enum BettingStyleEnum {
     "passive" = "Passive",
     "normal" = "Normal",
-    "aggressive" = "Aggressive"
+    "aggressive" = "Aggressive",
+    "watered" = "Watered"
 }
