@@ -7,7 +7,6 @@ import { useTeam } from "@/hooks/useTeams";
 import { usePathname } from "next/navigation";
 import { Team } from "@/types/Team";
 import { useTeamStats } from "@/hooks/useTeamStats";
-import { MdOutlineInfo } from "react-icons/md";
 import { BettingStyleEnum } from "@/enums/BettingStyleEnum";
 import PlayerProjections from "./PlayerProjections";
 import { PlayerProps } from "@/types/PlayerProps";
@@ -31,7 +30,7 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
   const [selectedBettingStyle, setSelectedBettingStyle] =
     useState<BettingStyleEnum>(BettingStyleEnum.normal);
 
-  const [showInfo, setShowInfo] = useState<Record<string, boolean>>({});
+  const [extraDetails, setExtraDetails] = useState<string[]>([]);
 
   const [response, setResponse] = useState<any>();
 
@@ -57,19 +56,24 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
     )?.columns || []
   )}` : ""}
   
-  # Betting Context
-  **Wagering Style:** ${selectedBettingStyle}
-  ${
-    {
-      "Aggressive": "- Emphasize 90th percentile outcomes\\n- High variance tolerance\\n- +15% to upper projections",
-      "Normal": "- Balance median expectations\\n- ±5% variance buffer",
-      "Passive": "- 25th percentile floor projections\\n- +10% risk buffer",
-      "Watered": "- Alternate lines only\\n- 97-100% confidence required\\n- Create non-book lines when justified"
-    }[selectedBettingStyle]
-  }
+# Betting Context
+**Wagering Style:** ${selectedBettingStyle}
+${
+  {
+    "Aggressive": "- Emphasize 90th percentile outcomes\n- High variance tolerance\n- +15% to upper projections",
+    "Normal": "- Balance median expectations\n- ±5% variance buffer",
+    "Passive": "- 25th percentile floor projections\n- +10% risk buffer",
+    "Watered": "- Alternate lines only\n- 97-100% confidence required\n- Create non-book lines when justified"
+  }[selectedBettingStyle]
+}
+
   
   # Player Prop Context
   ${JSON.stringify(playerProps || [])}
+
+# Extra Details Context
+${extraDetails.length > 0 ? JSON.stringify(extraDetails) : "No extra details to consider"}
+
   
   ## Analysis Requirements
   1. **Data Processing**
@@ -88,9 +92,10 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
      - Watered bets require 4+ props at 95-97% confidence
      - Betslip must have ≥72% confidence
      - Consider historical player-team dynamics
+     - Take into consideration the extra details if they are note-worthy
   
   ## Required Output Format
-  \\\`\\\`\\\`json
+  \`\`\`json
   {
     "projections": [
       {
@@ -103,7 +108,7 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
     ],
     "betRecommendations": [
       {
-        "type": "${selectedBettingStyle}",
+        "type": "[REQUIRED_BETTING_STYLE]",
         "market": "Points Over/Under",
         "edge": "HIGH",
         "rationale": "Line-specific analysis with comparison"
@@ -134,10 +139,10 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
       }
     ]
   }
-  \\\`\\\`\\\`
+  \`\`\`
   
   **Validation Constraints:**
-  - Maximum 5 projections
+  - Watered bets must always appear
   - Numeric values only (no null/undefined)
   - Watered bets require ≥4 recommendations
   - Confidence ranges:
@@ -145,28 +150,51 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
     - Watered: 95-100%
     - Regular: 50-94%
   - Strict stat abbreviation adherence
+  - JSON must use DOUBLE quotes only
+  - No trailing commas
+  - Decimal numbers only (no fractions)
+  - Empty arrays preferred over null/undefined
+  - All stat abbreviations must match: ${JSON.stringify(player.stats?.map(s => s.abbr) || [])}
   `;
 
   
   const fetchAiResponse = async () => {
-    console.log("Prompt", prompt);
-    const result = await model.generateContent(prompt);
-    const rawResponse = result.response.text();
-
-    // Process the response to add newlines after each series of numbers
-    const formattedResponse = rawResponse
-      .replace("```json", "")
-      .replace("```", "");
-
-    setResponse(JSON.parse(formattedResponse));
+    try {
+      setResponse(undefined);
+      const result = await model.generateContent(prompt);
+      const rawResponse = result.response.text();
+      
+      // Enhanced JSON parsing with fallbacks
+      const jsonMatch = rawResponse.match(/```json([\s\S]*?)```/);
+      const formattedResponse = jsonMatch ? jsonMatch[1].trim() : rawResponse;
+      
+      // Parse with error recovery
+      const parsed = JSON.parse(formattedResponse);
+      
+      // Ensure watered bets array exists
+      const finalResponse = {
+        projections: parsed.projections || [],
+        betRecommendations: parsed.betRecommendations || [],
+        propsRecommendations: parsed.propsRecommendations || [],
+        bettingSlipRecommendation: parsed.bettingSlipRecommendation || [],
+        wateredBetRecommendation: parsed.wateredBetRecommendation || []
+      };
+  
+      setResponse(finalResponse);
+    } catch (err) {
+      console.error('Processing Error:', err);
+      // Add retry logic or error feedback
+    }
   };
 
   useEffect(() => {
-    fetchAiResponse();
-  }, []);
+    console.log(prompt);
+  }, [prompt])
 
   useEffect(() => {
-    console.log(response);
+    if(!response) {
+      fetchAiResponse();
+    }
   }, [response]);
 
   useEffect(() => {
@@ -179,39 +207,10 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
     fetchData();
   }, [selectedTeam]);
 
-  useEffect(() => {
-    const processStats = async () => {
-      if (teamStats) {
-        setResponse(undefined); // Clear the previous response
-        await fetchAiResponse(); // Fetch the AI response based on the updated teamStats
-      }
-    };
-
-    processStats();
-  }, [teamStats]);
-
-  useEffect(() => {
-    const processStats = async () => {
-      if (selectedBettingStyle) {
-        setResponse(undefined); // Clear the previous response
-        await fetchAiResponse(); // Fetch the AI response based on the updated teamStats
-      }
-    };
-
-    processStats();
-  }, [selectedBettingStyle]);
-
-  const toggleInfo = (statName: string) => {
-    setShowInfo((prev) => ({
-      ...prev,
-      [statName]: !prev[statName],
-    }));
-  };
-
   return (
-    <div className="">
+    <div className="flex flex-col lg:flex-row">
       {teams && selectedTeam && setSelectedTeam && (
-        <div className="flex flex-col md:flex-row gap-x-2">
+        <div className="flex flex-col gap-x-2 min-w-60 lg:max-w-60">
           <AiPromptsFilter
             player={player}
             teams={teams}
@@ -219,12 +218,16 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
             setSelectedTeam={setSelectedTeam}
             selectedBettingStyle={selectedBettingStyle}
             setSelectedBettingStyle={setSelectedBettingStyle}
+            response={response}
+            fetchAiResponse={fetchAiResponse}
+            extraDetails={extraDetails}
+            setExtraDetails={setExtraDetails}
           />
         </div>
       )}
 
       {response !== undefined ? (
-        <div className="">
+        <div className="p-2 flex-grow w-full">
           <div className="grid grid-cols-2 gap-4 items-center">
             <div className="col-span-full mt-4">
               {response && <PlayerProjections data={response} />}

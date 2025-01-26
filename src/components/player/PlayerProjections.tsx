@@ -30,6 +30,10 @@ const PlayerProjections = (props: { data: any }) => {
         return "text-yellow-500";
       case "HIGH":
         return "text-green-500"
+      case "NEGATIVE":
+        return "text-neutral-700"
+      case "POSITIVE":
+        return "text-green-500"
     }
   }
 

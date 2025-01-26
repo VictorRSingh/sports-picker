@@ -47,7 +47,7 @@ const PlayerPage = () => {
   return (
     <>
       {player && gameLogs ? (
-        <div className="flex flex-col gap-y-4 w-full justify-center lg:px-40">
+        <div className="flex flex-col gap-y-4 w-full justify-center">
           <PlayerSubNav activeTab={activeTab} setActiveTab={setActiveTab} />
           <PlayerHeader player={player} />
           <div className="overflow-x-auto h-full">{renderContent()}</div>
