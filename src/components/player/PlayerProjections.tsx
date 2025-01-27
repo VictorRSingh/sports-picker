@@ -1,6 +1,7 @@
+import { Team } from "@/types/Team";
 import React from "react";
 
-const PlayerProjections = (props: { data: any }) => {
+const PlayerProjections = (props: { data: any, selectedTeam: Team }) => {
   const confidenceColor = (confidence: any) => {
     if (confidence >= 75) return "text-green-600";
     if (confidence >= 60) return "text-yellow-600";
@@ -29,13 +30,13 @@ const PlayerProjections = (props: { data: any }) => {
       case "MEDIUM":
         return "text-yellow-500";
       case "HIGH":
-        return "text-green-500"
+        return "text-green-500";
       case "NEGATIVE":
-        return "text-neutral-700"
+        return "text-neutral-700";
       case "POSITIVE":
-        return "text-green-500"
+        return "text-green-500";
     }
-  }
+  };
 
   console.log(props.data);
 
@@ -49,190 +50,98 @@ const PlayerProjections = (props: { data: any }) => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {props.data.projections.map((proj: any, index: number) => (
             <div
-              key={index}
+              key={proj.stat}
               className="bg-white p-4 rounded-lg shadow-sm border border-gray-200"
             >
               <div className="flex justify-between items-start mb-2">
                 <h3 className="text-lg font-semibold text-gray-700">
                   {proj.stat}
                 </h3>
-                <span
-                  className={`text-sm font-medium ${confidenceColor(
-                    proj.confidence
-                  )}`}
-                >
-                  {proj.confidence}% Confidence
-                </span>
               </div>
               <div className="space-y-2">
                 <p className="text-blue-600 font-bold text-xl">
-                  Projection: {proj.projection}
+                  Projection: {proj.range.join("-")}
                 </p>
+                <p className="text-sm text-gray-600 italic">{`${proj.vsLine && `"${proj.vsLine} deviation"`}`}</p>
                 <p className="text-sm text-gray-600 italic">
-                  "{proj.matchupLeverage}"
+                  {props.selectedTeam.name && `"${proj.matchupImpact}"`}
                 </p>
-                <div className="flex items-center text-sm text-gray-500">
-                  <span className="mr-2">📈 Trend:</span>
-                  {proj.trend}
-                </div>
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Bet Recommendations */}
+      {/* BettingSlip Section */}
       <div>
         <h2 className="text-2xl font-bold mb-4 text-gray-800">
-          Betting Recommendations
+          Betting Slip Recommendations
         </h2>
-        <div className="space-y-3">
-          {props.data.betRecommendations.map((bet: any, index: number) => (
-            <div
-              key={index}
-              className={`p-4 rounded-lg border ${betTypeColor(bet.type)}`}
-            >
-              <div className="flex justify-between items-center mb-2">
-                <div className="flex items-center space-x-2 w-full justify-between">
-                  <span className="font-semibold text-gray-700 flex-grow">
-                    {bet.market}
-                  </span>
-                  <div className="flex flex-col">
-                    <div className="flex justify-end">
-                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-600 text-white">
-                        {bet.type}
-                      </span>
-                    </div>
-                    <span className={`font-bold ${edgeColor(bet.edge)}`}>
-                      Edge: {bet.edge} 
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <p className="text-sm text-gray-600">{bet.rationale}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Prop Recommendations */}
-      <div>
-        <h2 className="text-2xl font-bold mb-4 text-gray-800">
-          Prop Recommendations
-        </h2>
-        <div className="space-y-3">
-          {props.data.propsRecommendations.map((bet: any, index: number) => (
-            <div
-              key={index}
-              className={`p-4 rounded-lg border ${betTypeColor(bet.type)}`}
-            >
-              <div className="flex justify-between items-center mb-2">
-                <div className="flex items-center space-x-2 w-full justify-between">
-                  <span className="font-semibold text-gray-700 flex-grow">
-                    {bet.prop}
-                  </span>
-                  <div className="flex flex-col">
-                    <div className="flex justify-end">
-                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-600 text-white">
-                        {bet.recommendation}
-                      </span>
-                    </div>
-                    <div className="flex justify-end">
-                      <span
-                        className={`text-sm font-medium ${confidenceColor(
-                          bet.confidence
-                        )}`}
-                      >
-                        {bet.confidence}% Confidence
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <p className="text-sm text-gray-600">{bet.rationale}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* betSlip Recommendations */}
-      <div>
-        <h2 className="text-2xl font-bold mb-4 text-gray-800">
-          Bet Slip Recommendations
-        </h2>
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {props.data.bettingSlipRecommendation.map(
             (bet: any, index: number) => (
               <div
-                key={index}
-                className={`p-4 rounded-lg border ${betTypeColor(bet.type)}`}
+                key={bet.market}
+                className="bg-white p-4 rounded-lg shadow-sm border border-gray-200"
               >
-                <div className="flex justify-between items-center mb-2">
-                  <div className="flex items-center space-x-2 w-full justify-between">
-                    <span className="font-semibold text-gray-700 flex-grow">
-                      {bet.prop}
-                    </span>
-                    <div className="flex flex-col">
-                      <div className="flex justify-end">
-                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-600 text-white">
-                          {bet.recommendation}
-                        </span>
-                      </div>
-                      <div className="flex justify-end">
-                        <span
-                          className={`text-sm font-medium ${confidenceColor(
-                            bet.confidence
-                          )}`}
-                        >
-                          {bet.confidence}% Confidence
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="text-lg font-semibold text-gray-700">
+                    {bet.market}
+                  </h3>
                 </div>
-                <p className="text-sm text-gray-600">{bet.rationale}</p>
+                <div className="space-y-2">
+                <p className="text-sm text-gray-600 italic">
+                    "{bet.recommendation}"
+                  </p>
+                  <p
+                    className={`font-bold text-lg italic ${confidenceColor(
+                      bet.confidence
+                    )}`}
+                  >
+                    {bet.confidence}% Confidence
+                  </p>
+                  <p className="text-sm text-gray-600 italic">
+                    "{bet.rationale}"
+                  </p>
+                </div>
               </div>
             )
           )}
         </div>
       </div>
 
-      {/* Watered down Recommendations */}
+      {/* Watered Section */}
       <div>
         <h2 className="text-2xl font-bold mb-4 text-gray-800">
-          Watered Recommendations
+          Watered/High Confidence Bets
         </h2>
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {props.data.wateredBetRecommendation.map(
             (bet: any, index: number) => (
               <div
-                key={index}
-                className={`p-4 rounded-lg border ${betTypeColor(bet.type)}`}
+                key={bet.market}
+                className="bg-white p-4 rounded-lg shadow-sm border border-gray-200"
               >
-                <div className="flex justify-between items-center mb-2">
-                  <div className="flex items-center space-x-2 w-full justify-between">
-                    <span className="font-semibold text-gray-700 flex-grow">
-                      {bet.prop}
-                    </span>
-                    <div className="flex flex-col">
-                      <div className="flex justify-end">
-                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-600 text-white">
-                          {bet.recommendation}
-                        </span>
-                      </div>
-                      <div className="flex justify-end">
-                        <span
-                          className={`text-sm font-medium ${confidenceColor(
-                            bet.confidence
-                          )}`}
-                        >
-                          {bet.confidence}% Confidence
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="text-lg font-semibold text-gray-700">
+                    {bet.market}
+                  </h3>
                 </div>
-                <p className="text-sm text-gray-600">{bet.rationale}</p>
+                <div className="space-y-2">
+                  <p
+                    className={`font-bold text-lg italic ${confidenceColor(
+                      bet.confidence
+                    )}`}
+                  >
+                    {bet.confidence}% Confidence
+                  </p>
+                  <p className="text-xl text-gray-600 font-bold">
+                    {bet.recommendation}
+                  </p>
+                  <p className="text-sm text-gray-600 italic">
+                    {bet.rationale}
+                  </p>
+                </div>
               </div>
             )
           )}

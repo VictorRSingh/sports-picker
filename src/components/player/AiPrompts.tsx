@@ -27,6 +27,7 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
     sport: "",
     webUrl: "",
   });
+
   const [selectedBettingStyle, setSelectedBettingStyle] =
     useState<BettingStyleEnum>(BettingStyleEnum.normal);
 
@@ -40,159 +41,192 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
   const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
 
   const prompt = `
-  Analyze sports betting opportunities for ${player.name} using the following structured data:
+  Analyze betting opportunities for ${player.name} with emphasis on alternate lines. Follow this structure:
   
-  # Player Context
-  **Recent Performance:**
-  ${JSON.stringify(gameLogs.rows || [])}
+  # Core Inputs
+  1. PLAYER CONTEXT
+  - Recent GameLog: ${JSON.stringify(gameLogs)}
+  - Key Stats: ${JSON.stringify(player.stats)}
+  - Player Props: ${JSON.stringify(playerProps)}
   
-  ${selectedTeam.name ? `
-  # Matchup Context
-  **Opposing Team (${selectedTeam.name}) Defense:**
-  - Headers: ${JSON.stringify(teamStats?.headers?.columns || [])}
-  - Stats: ${JSON.stringify(
-    teamStats?.rows?.find(team => 
-      team.columns[0]?.text?.includes(selectedTeam.name)
-    )?.columns || []
-  )}` : ""}
+  2. OPPOSITION ANALYSIS
+  ${
+    selectedTeam.name && teamStats != undefined
+      ? `
+    ${selectedTeam.name} defense:
+    ${JSON.stringify(teamStats)}
+    `
+      : "No Team to compare with"
+  }
   
-# Betting Context
-**Wagering Style:** ${selectedBettingStyle}
-${
-  {
-    "Aggressive": "- Emphasize 90th percentile outcomes\n- High variance tolerance\n- +15% to upper projections",
-    "Normal": "- Balance median expectations\n- ±5% variance buffer",
-    "Passive": "- 25th percentile floor projections\n- +10% risk buffer",
-    "Watered": "- Alternate lines only\n- 97-100% confidence required\n- Create non-book lines when justified"
-  }[selectedBettingStyle]
-}
-
+  3. BETTING PARAMETERS
+  - Style: ${selectedBettingStyle}
+    ${
+      {
+        Aggressive: "» Focus: 90th percentile outcomes (+15% boost)",
+        Normal: "» Balance: Median expectations (±5% buffer)",
+        Passive: "» Conservative: 25th percentile floors (+10% buffer)",
+        Watered:
+          "» Strategy: Alternate lines only\n» Targets: Sportsbook milestones (e.g., 20+ pts, 5+ ast)\n» Confidence: 97%+ required",
+      }[selectedBettingStyle]
+    }
   
-  # Player Prop Context
-  ${JSON.stringify(playerProps || [])}
-
-# Extra Details Context
-${extraDetails.length > 0 ? JSON.stringify(extraDetails) : "No extra details to consider"}
-
+  # Analysis Requirements
+  1. PROJECTION MODEL
+  - Convert fractions → decimals
+  - Weights: Recent 40% | Season 20% | Matchup 20% | Style 20%
+  - Validate stats against: [${player.stats?.map((s) => s.abbr).join(", ")}]
   
-  ## Analysis Requirements
-  1. **Data Processing**
-     - Convert all fractional stats to decimals
-     - Use exact column values from: ${JSON.stringify(gameLogs.headers?.columns || [])}
-     - Validate stat abbreviations against: ${JSON.stringify(player.stats?.map(s => s.abbr) || [])}
+  2. WATERED BET RULES
+  - Require ≥4 recommendations
+  - Must include 2+ milestone markets (e.g., 20+ pts)
+  - 97-100% confidence only
+  - Prioritize: Player-team history → Current form → Matchup
+  - High hit rates only (80% - 100%)
+  - Reject any bet with:
+    • Raw game counts in rationale ("X/Y games")
+    • Sample size <10 games
+    • Hit rate <80%
+  - Required format:
+    "Projected [value] ([XX.X]% hit rate in [category])"
   
-  2. **Projection Weights**
-     - Recent Form: 40%
-     - Season Averages: 30%
-     - Matchup Defense: 20%
-     - Style Adjustment: 10%
+  3. OUTPUT CONSTRAINTS
+  - Decimals only, no trailing commas
+  - Empty arrays if no matches
+  - Confidence tiers:
+    Betslip: 72-100%
+    Watered: 97-100%
+    Regular: 50-94%
   
-  3. **Recommendation Rules**
-     - Include all props with edge analysis (positive/negative)
-     - Watered bets require 4+ props at 95-97% confidence
-     - Betslip must have ≥72% confidence
-     - Consider historical player-team dynamics
-     - Take into consideration the extra details if they are note-worthy
-  
-  ## Required Output Format
+  # Expected Output
   \`\`\`json
   {
-    "projections": [
-      {
-        "stat": "ValidStatAbbreviation",
-        "projection": 28.9,
-        "confidence": 72,
-        "matchupLeverage": "Specific defensive weakness",
-        "trend": "3-game streak type"
-      }
-    ],
-    "betRecommendations": [
-      {
-        "type": "[REQUIRED_BETTING_STYLE]",
-        "market": "Points Over/Under",
-        "edge": "HIGH",
-        "rationale": "Line-specific analysis with comparison"
-      }
-    ],
-    "propsRecommendations": [
-      {
-        "prop": "Points",
-        "recommendation": "Over 27.5",
-        "rationale": "Trend vs defensive matchup",
-        "confidence": 85
-      }
-    ],
-    "bettingSlipRecommendation": [
-      {
-        "prop": "Rebounds",
-        "recommendation": "Under 8.5",
-        "confidence": 78,
-        "rationale": "Matchup-specific justification"
-      }
-    ],
-    "wateredBetRecommendation": [
-      {
-        "prop": "Assists",
-        "recommendation": "Over 4.5",
-        "confidence": 96,
-        "rationale": "High-volume trend analysis"
-      }
-    ]
+    "projections": [{
+      "stat": "<playerStat>",
+      "range": [<calculatedFloor>, <calculatedCeiling>],
+      "vsLine": <calculateDeviation>,
+      "matchupImpact": <matchupRational>
+    }],
+    
+    "wateredBetRecommendation": [{
+      "market": "<playerStatMarket>",
+      "recommendation": "<altLineRecommendationWithHighConfidence>",
+      "edge": <calculatedEdge>,
+      "confidence": <calculatedConfidence>,
+      "rationale": <rationale>
+    }],
+    
+    "bettingSlipRecommendation": [{
+      "market": "<playerStatMarket>",
+      "rationale": "<rationale>",
+      "confidence": <calculatedConfidence>
+      "recommendation": "<RecommendationWithHighConfidence>",
+    }]
   }
   \`\`\`
   
-  **Validation Constraints:**
-  - Watered bets must always appear
-  - Numeric values only (no null/undefined)
-  - Watered bets require ≥4 recommendations
-  - Confidence ranges:
-    - Betslip: 70-100%
-    - Watered: 95-100%
-    - Regular: 50-94%
-  - Strict stat abbreviation adherence
-  - JSON must use DOUBLE quotes only
-  - No trailing commas
-  - Decimal numbers only (no fractions)
-  - Empty arrays preferred over null/undefined
-  - All stat abbreviations must match: ${JSON.stringify(player.stats?.map(s => s.abbr) || [])}
-  `;
-
+  # Instructions for Analysis
+  1. **Projections**:
+     - Calculate floor and ceiling for each stat based on the weighted model (Recent 40%, Season 20%, Matchup 20%, Style 20%).
+     - Express matchup impact as a percentage (e.g., "5% PPG Impact").
+     - Ensure all values are in decimals and match the stat abbreviations: ${player.stats?.map((s) => s.abbr).join(", ")}.
   
+  2. **Watered Bet Recommendations**:
+     - Only include recommendations with 97-100% confidence.
+     - Ensure at least 2 milestone markets are included.
+     - Use the format: "Projected [value] ([XX.X]% hit rate in [category])".
+     - Reject any bet with raw game counts, sample size <10, or hit rate <80%.
+  
+  3. **Betting Slip Recommendations**:
+     - Include recommendations with 72-100% confidence.
+     - Provide a clear rationale for each recommendation.
+     - Avoid raw game counts in the rationale.
+  
+  # Critical Validation
+  - Watered bets MUST include milestone markets.
+  - Stat abbreviations EXACTLY match: ${player.stats?.map((s) => s.abbr).join(", ")}.
+  - Take into consideration opposing teams defensive stats if provided
+  - All confidence values within defined ranges.
+  - No raw game counts in rationale (e.g., "2/41 games").
+  - Hit rates must be expressed as percentages (e.g., "85.3% hit rate").
+  `;
+  
+
+  // Updated fetchAiResponse with type safety
+  type BetRecommendation = {
+    market: string;
+    recommendation: string;
+    edge: string;
+    confidence: number;
+    sportsbookLines?: string[];
+    rationale?: string;
+  };
+
+  type Projection = {
+    stat: string;
+    range: [number, number];
+    vsLine: string;
+    matchupImpact: string;
+  };
+
   const fetchAiResponse = async () => {
     try {
       setResponse(undefined);
       const result = await model.generateContent(prompt);
       const rawResponse = result.response.text();
-      
-      // Enhanced JSON parsing with fallbacks
+
+      // Type-safe parsing
       const jsonMatch = rawResponse.match(/```json([\s\S]*?)```/);
       const formattedResponse = jsonMatch ? jsonMatch[1].trim() : rawResponse;
-      
-      // Parse with error recovery
-      const parsed = JSON.parse(formattedResponse);
-      
-      // Ensure watered bets array exists
-      const finalResponse = {
-        projections: parsed.projections || [],
-        betRecommendations: parsed.betRecommendations || [],
-        propsRecommendations: parsed.propsRecommendations || [],
-        bettingSlipRecommendation: parsed.bettingSlipRecommendation || [],
-        wateredBetRecommendation: parsed.wateredBetRecommendation || []
+
+      const parsed = JSON.parse(formattedResponse) as {
+        projections?: Projection[];
+        wateredBetRecommendation?: BetRecommendation[];
+        bettingSlipRecommendation?: BetRecommendation[];
       };
-  
+
+      // Normalize responses with fallbacks
+      const finalResponse = {
+        projections:
+          parsed.projections?.map((p) => ({
+            stat: p.stat,
+            range: p.range || [0, 0],
+            vsLine: p.vsLine || "",
+            matchupImpact: p.matchupImpact || "",
+          })) || [],
+
+        wateredBetRecommendation:
+          parsed.wateredBetRecommendation?.map((b) => ({
+            market: b.market,
+            recommendation: b.recommendation,
+            edge: b.edge,
+            confidence: Math.min(100, Math.max(97, b.confidence)), // Enforce watered confidence
+            sportsbookLines: b.sportsbookLines || [],
+            rationale: b.rationale,
+          })) || [],
+
+        bettingSlipRecommendation:
+          parsed.bettingSlipRecommendation?.map((b) => ({
+            market: b.market,
+            recommendation: b.recommendation,
+            confidence: Math.min(100, Math.max(72, b.confidence)), // Enforce betslip range
+            rationale: b.rationale,
+          })) || [],
+      };
+
       setResponse(finalResponse);
     } catch (err) {
-      console.error('Processing Error:', err);
-      // Add retry logic or error feedback
+      console.error("Processing Error:", err);
+      // Consider error state handling
     }
   };
 
   useEffect(() => {
     console.log(prompt);
-  }, [prompt])
+  }, [prompt]);
 
   useEffect(() => {
-    if(!response) {
+    if (!response) {
       fetchAiResponse();
     }
   }, [response]);
@@ -230,7 +264,12 @@ ${extraDetails.length > 0 ? JSON.stringify(extraDetails) : "No extra details to 
         <div className="p-2 flex-grow w-full">
           <div className="grid grid-cols-2 gap-4 items-center">
             <div className="col-span-full mt-4">
-              {response && <PlayerProjections data={response} />}
+              {response && (
+                <PlayerProjections
+                  data={response}
+                  selectedTeam={selectedTeam}
+                />
+              )}
             </div>
           </div>
         </div>

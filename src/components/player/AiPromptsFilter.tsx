@@ -121,10 +121,14 @@ const AiPromptsFilter = ({
       </div>
       <div className="w-full">
         <button
-          className="w-full bg-green-500 px-2 py-1 rounded"
-          onClick={() => fetchAiResponse()}
+          className={`w-full px-2 py-1 rounded ${response ? 'bg-green-500 cursor-pointer' : 'bg-gray-500 cursor-wait'}`}
+          onClick={() => {
+            if(response) {
+              fetchAiResponse()
+            }
+          }}
         >
-          Generate Projections
+          {`${response ? 'Generate Projections' : 'Please Wait'}`}
         </button>
       </div>
     </div>
