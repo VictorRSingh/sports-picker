@@ -78,11 +78,11 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
   - Validate stats against: [${player.stats?.map((s) => s.abbr).join(", ")}]
   
   2. WATERED BET RULES
-  - Require ≥4 recommendations
-  - Must include 2+ milestone markets (e.g., 20+ pts)
-  - 97-100% confidence only
+  - As many as possible recomended bets
+  - Include as many milestone markets (e.g., 20+ pts)
+  - STRICT 100% confidence only
   - Prioritize: Player-team history → Current form → Matchup
-  - High hit rates only (80% - 100%)
+  - High hit rates only (100%)
   - Reject any bet with:
     • Raw game counts in rationale ("X/Y games")
     • Sample size <10 games
