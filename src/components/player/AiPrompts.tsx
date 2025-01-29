@@ -38,17 +38,16 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
   const genAI = new GoogleGenerativeAI(
     "AIzaSyBRV9n6tEoOcMOEpehbv_AjtU6j3r5WLlM"
   );
-  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
-
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
   const prompt = `
   Analyze betting opportunities for ${player.name} with emphasis on alternate lines. Follow this structure:
-  
+
   # Core Inputs
   1. PLAYER CONTEXT
   - Recent GameLog: ${JSON.stringify(gameLogs)}
   - Key Stats: ${JSON.stringify(player.stats)}
   - Player Props: ${JSON.stringify(playerProps)}
-  
+
   2. OPPOSITION ANALYSIS
   ${
     selectedTeam.name && teamStats != undefined
@@ -58,54 +57,52 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
     `
       : "No Team to compare with"
   }
-  
+
   3. BETTING PARAMETERS
   - Style: ${selectedBettingStyle}
     ${
       {
-        Aggressive: "» Focus: 90th percentile outcomes (+15% boost)",
-        Normal: "» Balance: Median expectations (±5% buffer)",
-        Passive: "» Conservative: 25th percentile floors (+10% buffer)",
+        Aggressive: "» Focus: Median projection with a +5% boost",
+        Normal: "» Focus: Median projection",
+        Passive: "» Focus: Median projection with a -5% reduction",
         Watered:
           "» Strategy: Alternate lines only\n» Targets: Sportsbook milestones (e.g., 20+ pts, 5+ ast)\n» Confidence: 97%+ required",
       }[selectedBettingStyle]
     }
-  
+
   # Analysis Requirements
   1. PROJECTION MODEL
-  - Convert fractions → decimals
-  - Weights: Recent 40% | Season 20% | Matchup 20% | Style 20%
+  - Weights: Recent 20% | Season 40% | Matchup 20% | Style 20%
+  - Use the **median value** as the central tendency for all calculations.
   - Validate stats against: [${player.stats?.map((s) => s.abbr).join(", ")}]
-  
+
   2. WATERED BET RULES
-  - As many as possible recomended bets
-  - Include as many milestone markets (e.g., 20+ pts)
-  - STRICT 100% confidence only
-  - Prioritize: Player-team history → Current form → Matchup
-  - High hit rates only (100%)
+  - Minimum 4 recommendations with 97-100% confidence.
+  - Include milestone markets (e.g., 20+ pts, 15+ points, 8+ rebounds, under 6.5 rebounds) for stats: [${player.stats?.map((s) => s.abbr).join(", ")}].
+  - Prioritize: Player-team history → Current form → Matchup.
   - Reject any bet with:
-    • Raw game counts in rationale ("X/Y games")
-    • Sample size <10 games
-    • Hit rate <80%
-  - Required format:
-    "Projected [value] ([XX.X]% hit rate in [category])"
-  
-  3. OUTPUT CONSTRAINTS
-  - Decimals only, no trailing commas
-  - Empty arrays if no matches
-  - Confidence tiers:
-    Betslip: 72-100%
-    Watered: 97-100%
-    Regular: 50-94%
-  
+    • Raw game counts in rationale ("X/Y games").
+    • Sample size <10 games.
+    • Hit rate <80%.
+  - Format: "Projected [value] ([XX.X]% hit rate in [category])".
+
+  3. BETTING SLIP RULES
+  - Minimum 3 recommendations with 72-100% confidence.
+  - Provide clear rationale without raw game counts.
+  - Reject any bet with sample size <10 games or hit rate <70%.
+
+  # Output Constraints
+  - Decimals only, no trailing commas.
+  - Empty arrays if no matches.
+  - Stat abbreviations must match: [${player.stats?.map((s) => s.abbr).join(", ")}].
+
   # Expected Output
   \`\`\`json
   {
     "projections": [{
       "stat": "<playerStat>",
-      "range": [<calculatedFloor>, <calculatedCeiling>],
-      "vsLine": <calculateDeviation>,
-      "matchupImpact": <matchupRational>
+      "projection": <calculatedProjection>, // Single number value (median-based)
+      "matchupImpact": "<rationaleForSpecificMatchup>"
     }],
     
     "wateredBetRecommendation": [{
@@ -113,44 +110,25 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
       "recommendation": "<altLineRecommendationWithHighConfidence>",
       "edge": <calculatedEdge>,
       "confidence": <calculatedConfidence>,
-      "rationale": <rationale>
+      "rationale": "<rationale>"
     }],
     
     "bettingSlipRecommendation": [{
       "market": "<playerStatMarket>",
-      "rationale": "<rationale>",
-      "confidence": <calculatedConfidence>
       "recommendation": "<RecommendationWithHighConfidence>",
+      "confidence": <calculatedConfidence>,
+      "rationale": "<rationale>"
     }]
   }
   \`\`\`
-  
-  # Instructions for Analysis
-  1. **Projections**:
-     - Calculate floor and ceiling for each stat based on the weighted model (Recent 40%, Season 20%, Matchup 20%, Style 20%).
-     - Express matchup impact as a percentage (e.g., "5% PPG Impact").
-     - Ensure all values are in decimals and match the stat abbreviations: ${player.stats?.map((s) => s.abbr).join(", ")}.
-  
-  2. **Watered Bet Recommendations**:
-     - Only include recommendations with 97-100% confidence.
-     - Ensure at least 2 milestone markets are included.
-     - Use the format: "Projected [value] ([XX.X]% hit rate in [category])".
-     - Reject any bet with raw game counts, sample size <10, or hit rate <80%.
-  
-  3. **Betting Slip Recommendations**:
-     - Include recommendations with 72-100% confidence.
-     - Provide a clear rationale for each recommendation.
-     - Avoid raw game counts in the rationale.
-  
+
   # Critical Validation
   - Watered bets MUST include milestone markets.
-  - Stat abbreviations EXACTLY match: ${player.stats?.map((s) => s.abbr).join(", ")}.
-  - Take into consideration opposing teams defensive stats if provided
-  - All confidence values within defined ranges.
-  - No raw game counts in rationale (e.g., "2/41 games").
+  - No raw game counts in rationale.
   - Hit rates must be expressed as percentages (e.g., "85.3% hit rate").
-  `;
-  
+  - Opposing team defensive stats must be considered if provided.
+`;
+
 
   // Updated fetchAiResponse with type safety
   type BetRecommendation = {
@@ -164,8 +142,7 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
 
   type Projection = {
     stat: string;
-    range: [number, number];
-    vsLine: string;
+    projection: number;
     matchupImpact: string;
   };
 
@@ -190,8 +167,7 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
         projections:
           parsed.projections?.map((p) => ({
             stat: p.stat,
-            range: p.range || [0, 0],
-            vsLine: p.vsLine || "",
+            projection: p.projection || 0,
             matchupImpact: p.matchupImpact || "",
           })) || [],
 

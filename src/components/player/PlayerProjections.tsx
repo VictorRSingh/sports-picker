@@ -41,7 +41,7 @@ const PlayerProjections = (props: { data: any, selectedTeam: Team }) => {
   console.log(props.data);
 
   return (
-    <div className="p-6 bg-gray-50 rounded-lg space-y-8 w-full">
+    <div className="p-3 bg-gray-50 rounded-lg space-y-8 w-full">
       {/* Projections Section */}
       <div>
         <h2 className="text-2xl font-bold mb-4 text-gray-800">
@@ -60,9 +60,8 @@ const PlayerProjections = (props: { data: any, selectedTeam: Team }) => {
               </div>
               <div className="space-y-2">
                 <p className="text-blue-600 font-bold text-xl">
-                  Projection: {proj.range.join("-")}
+                  Projection: {proj.projection}
                 </p>
-                <p className="text-sm text-gray-600 italic">{`${proj.vsLine && `"${proj.vsLine} deviation"`}`}</p>
                 <p className="text-sm text-gray-600 italic">
                   {props.selectedTeam.name && `"${proj.matchupImpact}"`}
                 </p>
