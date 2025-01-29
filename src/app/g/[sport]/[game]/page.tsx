@@ -15,12 +15,11 @@ const page = () => {
   const homeTeam = searchParams.get("home");
   const sport = searchParams.get("sport");
 
-const awayRoster = awayTeam ? useRoster(awayTeam) : null;
-const homeRoster = homeTeam ? useRoster(homeTeam) : null;
+  const awayRoster = awayTeam ? useRoster(awayTeam) : null;
+  const homeRoster = homeTeam ? useRoster(homeTeam) : null;
 
-
-  console.log(awayRoster)
-  console.log(homeRoster)
+  console.log(awayRoster);
+  console.log(homeRoster);
 
   const { game } = useGame(sport as string, gameUrl as string);
 
@@ -33,8 +32,15 @@ const homeRoster = homeTeam ? useRoster(homeTeam) : null;
           <GamePreview game={game} />
           {awayRoster && homeRoster && (
             <div className="flex flex-col lg:flex-row gap-y-4 w-full gap-x-4">
-              <RosterPreview roster={awayRoster} />
-              <RosterPreview roster={homeRoster} />
+              <div className="flex flex-col w-full">
+                <h1 className="text-lg font-bold mb-2">{`Away Team (${awayRoster.playerCount})`}</h1>
+                <RosterPreview roster={awayRoster} />
+              </div>
+              <div className="flex flex-col w-full">
+                <h1 className="text-lg font-bold mb-2">{`Home Team (${homeRoster.playerCount})`}</h1>
+                <RosterPreview roster={homeRoster} />
+              </div>
+
             </div>
           )}
         </>
