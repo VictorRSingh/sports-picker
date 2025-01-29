@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
 
     roster.playerCount = roster.players.length;
 
-    return NextResponse.json({ roster: roster });
+    return NextResponse.json(roster);
   } catch (error) {
     console.error("Failed to fetch roster", error);
     return NextResponse.json({ message: "Failed to fetch roster" });

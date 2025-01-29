@@ -1,7 +1,7 @@
 import { BettingStyleEnum } from "@/enums/BettingStyleEnum";
 import { Player } from "@/types/Player";
 import { Team } from "@/types/Team";
-import React, { Dispatch, SetStateAction, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { FaTrash } from "react-icons/fa";
 
 interface AiPromptsFilterProps {
@@ -30,6 +30,7 @@ const AiPromptsFilter = ({
   setExtraDetails,
 }: AiPromptsFilterProps) => {
   const [extraDetailsInput, setExtraDetailsInput] = useState<string>("");
+
   return (
     <div className="flex flex-col gap-y-4 px-4 w-full">
       <div className="w-full">
@@ -111,8 +112,10 @@ const AiPromptsFilter = ({
           <button
             className="p-1 text-sm bg-blue-400 rounded"
             onClick={() => {
-              extraDetails.push(extraDetailsInput);
-              setExtraDetailsInput("");
+              if (extraDetailsInput.trim() !== "") {
+                setExtraDetails((prev) => [...prev, extraDetailsInput]); // ✅ Create a new array
+                setExtraDetailsInput("");
+              }
             }}
           >
             Add Detail
@@ -121,14 +124,16 @@ const AiPromptsFilter = ({
       </div>
       <div className="w-full">
         <button
-          className={`w-full px-2 py-1 rounded ${response ? 'bg-green-500 cursor-pointer' : 'bg-gray-500 cursor-wait'}`}
+          className={`w-full px-2 py-1 rounded ${
+            response ? "bg-green-500 cursor-pointer" : "bg-gray-500 cursor-wait"
+          }`}
           onClick={() => {
-            if(response) {
-              fetchAiResponse()
+            if (response) {
+              fetchAiResponse();
             }
           }}
         >
-          {`${response ? 'Generate Projections' : 'Please Wait'}`}
+          {`${response ? "Generate Projections" : "Please Wait"}`}
         </button>
       </div>
     </div>

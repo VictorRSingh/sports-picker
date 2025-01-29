@@ -6,6 +6,7 @@ export type Game = {
     spread: string;
     moneyline: string;
     total: string;
+    teamUrl?: string;
   };
   away: {
     team: string;
@@ -13,5 +14,6 @@ export type Game = {
     spread: string;
     moneyline: string;
     total: string;
+    teamUrl?: string;
   };
 };

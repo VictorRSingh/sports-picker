@@ -2,7 +2,7 @@ import { Game } from "@/types/Game";
 import React from "react";
 import MatchupHeader from "./MatchupHeader";
 import MatchupRow from "./MatchupRow";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 interface MatchupTableProps {
     matchups: Game[];
@@ -10,6 +10,9 @@ interface MatchupTableProps {
 
 const MatchupTable = ({matchups}: MatchupTableProps) => {
   const router = useRouter();
+  const pathname = usePathname();
+
+  console.log(pathname)
   return (
     <div className="bg-neutral-800 rounded p-4">
       {matchups && matchups.length > 0 && (
@@ -17,11 +20,9 @@ const MatchupTable = ({matchups}: MatchupTableProps) => {
           <MatchupHeader />
           {matchups.map((matchup, index) => (
             <div
-              // href={`https://foxsports.com${matchup.gameUrl}`}
-              // target="_blank"
               key={index}
               className="grid grid-cols-1 w-full my-4 border p-2 rounded cursor-pointer"
-              onClick={(() => router.push(`/g/${matchup.gameUrl.split("?")[0]}`))}
+              onClick={(() => router.push(`/g/${matchup.gameUrl}&away=${matchup.away.teamUrl}&home=${matchup.home.teamUrl}&sport=${pathname.split("/")[1]}`))}
             >
               {/* Away Team */}
               <MatchupRow key={matchup.away.short} team={matchup.away} />

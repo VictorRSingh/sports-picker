@@ -36,7 +36,7 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
   const [response, setResponse] = useState<any>();
 
   const genAI = new GoogleGenerativeAI(
-    "AIzaSyBRV9n6tEoOcMOEpehbv_AjtU6j3r5WLlM"
+    "AIzaSyA3nMt9_5UiaPVevkUYavZEpuPeIZFAWrc"
   );
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
@@ -67,6 +67,13 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
           "» Strategy: Alternate milestone lines only\n» Targets: Whole numbers (e.g., 20+ pts, 5+ ast)\n» Confidence: 97-100% required",
       }[selectedBettingStyle]
     }
+
+  4. ADDITIONAL FACTORS
+  ${
+    extraDetails.length > 0
+      ? `- User-Provided Extra Details:\n${extraDetails.map((detail) => `  - ${detail}`).join("\n")}`
+      : "- No additional details provided"
+  }
 
   # Analysis Requirements
   1. PROJECTION MODEL
@@ -107,9 +114,9 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
 - Confidence is derived from the **player’s historical performance**.
 - Requirements:
   • **Hit rate = (Games over the sportsbook line) / (Total recent games played) × 100**.
-  • Hit rate **≥70%**.
+  • Hit rate **≥60%**.
   • Sample size **≥10 games**.
-  • Confidence **strictly between 72-96.9%**.
+  • Confidence **strictly between 60-96.9%**.
   • If no matchup data is available, use **season-long and last 10-game form instead**.
 
 - 🔹 **New Explicit Confidence Calculation Formula**
@@ -118,8 +125,8 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
     - **97%+ → Watered Bets (alternate milestones only)**
     - **90-96.9% → 95% confidence**
     - **80-89.9% → 85% confidence**
-    - **70-79.9% → 75% confidence**
-    - **Below 70% → Reject betting slip recommendation**
+    - **60-79.9% → 75% confidence**
+    - **Below 60% → Reject betting slip recommendation**
 
 - 🔹 **Fallback Rule:**
   - If no exact sportsbook line exists, select the **closest decimal sportsbook line** that is:
@@ -143,6 +150,7 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
   - Watered bets must use whole-number milestones (e.g., 20+ pts).
   - Betting slip must use decimal sportsbook lines (e.g., 15.5 pts).
   - Stat abbreviations must match: [${player.stats?.map((s) => s.abbr).join(", ")}].
+  - Only return the JSON asked for, nothing else
 
   # Expected Output
   \`\`\`json

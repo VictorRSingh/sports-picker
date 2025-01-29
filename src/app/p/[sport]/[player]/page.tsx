@@ -52,7 +52,20 @@ const PlayerPage = () => {
           <PlayerHeader player={player} />
           <div className="overflow-x-auto h-full">{renderContent()}</div>
         </div>
-      ) : <div>Loading Data..</div>}
+      ) : (
+        <div className="flex justify-center items-center w-full h-full">
+          <div className="flex flex-col gap-y-2">
+            <div className="flex items-center gap-x-2">
+              <span>Loading player data...</span>
+              {player && <span className="text-green-500">✓</span>}
+            </div>
+            <div className="flex items-center gap-x-2">
+              <span>Loading game logs...</span>
+              {gameLogs && <span className="text-green-500">✓</span>}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
