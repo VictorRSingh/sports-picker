@@ -9,6 +9,8 @@ export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const url = searchParams.get("url");
 
+  console.log("Url", url);
+
   try {
     if (!url) {
       return;
@@ -81,7 +83,8 @@ export async function GET(request: NextRequest) {
                 playerProp.props.push(props);
               });
             });
-          playerProps.push(playerProp)
+          playerProps.push(playerProp);
+          console.log(playerProps);
         });
       return NextResponse.json(playerProps);
     }

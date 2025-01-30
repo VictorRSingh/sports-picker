@@ -10,6 +10,7 @@ import { useTeamStats } from "@/hooks/useTeamStats";
 import { BettingStyleEnum } from "@/enums/BettingStyleEnum";
 import PlayerProjections from "./PlayerProjections";
 import { PlayerProps } from "@/types/PlayerProps";
+import { alternateLines } from "../../../public/data/AlternateLines";
 
 interface AiPromptsProps {
   gameLogs: Gamelog;
@@ -19,6 +20,8 @@ interface AiPromptsProps {
 
 const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
   const pathname = usePathname();
+  const sport = pathname.split("/")[2].toUpperCase() as keyof typeof alternateLines[0];
+
   const { teams } = useTeam(pathname.replace("/p", "").split("/")[1]);
   const { teamStats, fetchTeamStats } = useTeamStats();
   const [selectedTeam, setSelectedTeam] = useState<Team>({
@@ -38,159 +41,105 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
   const genAI = new GoogleGenerativeAI(
     "AIzaSyA3nMt9_5UiaPVevkUYavZEpuPeIZFAWrc"
   );
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-8b-exp-0924" });
 
-  const prompt = `
-  Analyze betting opportunities for ${player.name} with emphasis on alternate lines. Follow this structure:
+  const pPlayerStats = player.stats && player.stats?.flatMap(player => player.name);
+  const pPlayerMarkets = playerProps && playerProps.flatMap(prop => prop.market);
+  const pAlternateMarkets = Object.keys(alternateLines[0][sport]);
+  console.log("pAlternateMarkets", pAlternateMarkets)
+  console.log("PlayerStats", pPlayerStats);
+  console.log("PlayerMarkets", pPlayerMarkets);
+
+  const prompt = `You are a sports betting assistant analyzing player prop bets. You are analyzing a player in the nba. Provide an expected range of outcomes and a betting suggestion based on historical trends, defensive matchups, and sportsbook odds for ${player.name}.
 
   # Core Inputs
-  1. PLAYER CONTEXT
-  - Recent GameLog: ${JSON.stringify(gameLogs)}
-  - Key Stats: ${JSON.stringify(player.stats)}
-  - Player Props: ${JSON.stringify(playerProps)}
-
-  2. OPPOSITION ANALYSIS
-  ${
-    selectedTeam.name && teamStats != undefined
-      ? `\n${selectedTeam.name} defense:\n${JSON.stringify(teamStats)}`
-      : "No Team to compare with"
-  }
-
-  3. BETTING PARAMETERS
-  - Style: ${selectedBettingStyle}
-    ${
-      {
-        Aggressive: "» Focus: Median projection with a +5% boost",
-        Normal: "» Focus: Median projection",
-        Passive: "» Focus: Median projection with a -5% reduction",
-        Watered: 
-          "» Strategy: Alternate milestone lines only\n» Targets: Whole numbers (e.g., 20+ pts, 5+ ast)\n» Confidence: 97-100% required",
-      }[selectedBettingStyle]
-    }
-
-  4. ADDITIONAL FACTORS
-  ${
-    extraDetails.length > 0
-      ? `- User-Provided Extra Details:\n${extraDetails.map((detail) => `  - ${detail}`).join("\n")}`
-      : "- No additional details provided"
-  }
-
-  # Analysis Requirements
-  1. PROJECTION MODEL
-  - Weights: Recent 20% | Season 40% | Matchup 20% | Style 20%
-  - Use **median value** for all calculations (never mean).
-  - Validate stats against: [${player.stats?.map((s) => s.abbr).join(", ")}]
-
-  2. WATERED BET RULES (97-100% CONFIDENCE)
-  - **Exclusive to milestone markets**: Whole numbers only (e.g., 20+ pts, 10+ reb).
-  - **Must be an alternate line**, not the player's standard sportsbook line.
-  - Minimum **1 recommendation required** (if possible).
-  - Dynamically generate milestone lines by **rounding down** from the projected value.
-  - Requirements:
-    • Season-long **hit rate ≥75%** (lowered from 80%).
-    • Sample size ≥10 games.
-    • Confidence strictly between **97-100%**.
-    • No matchup data? Use season-long and last 10-game form instead.
-    
-  - 🔹 **Dynamic Milestone Line Calculation**
-    - **Find the player’s projection** (e.g., **22.5 PPG**).
-    - **Round down** to the nearest whole milestone (**20+ pts**).
-    - If **hit rate ≥75%**, include the bet.
-    - If **not enough confidence**, check **the next lower milestone** (e.g., **15+ pts**).
-    
-  - Prioritization order:
-    1. **Player-team history** (if available).
-    2. **Current form (last 10 games)**.
-    3. **Season-long performance**.
-    
-  - Reject only if:
-    • No milestone achieves **≥75% hit rate**.
-    • Confidence <97%.
-    • The milestone line **is the same as the player’s standard line**.
-
-3. BETTING SLIP RULES (PLAYER'S STANDARD LINE ONLY) 
-- **Strictly use the standard sportsbook line (e.g., 25.5 pts, 9.5 ast).**
-- Minimum **1 recommendation required** (if valid).
-- Confidence is derived from the **player’s historical performance**.
-- Requirements:
-  • **Hit rate = (Games over the sportsbook line) / (Total recent games played) × 100**.
-  • Hit rate **≥60%**.
-  • Sample size **≥10 games**.
-  • Confidence **strictly between 60-96.9%**.
-  • If no matchup data is available, use **season-long and last 10-game form instead**.
-
-- 🔹 **New Explicit Confidence Calculation Formula**
-  - **Hit rate (%) = (Games above the sportsbook line) / (Total games played) × 100**
-  - **Confidence Bracket:**
-    - **97%+ → Watered Bets (alternate milestones only)**
-    - **90-96.9% → 95% confidence**
-    - **80-89.9% → 85% confidence**
-    - **60-79.9% → 75% confidence**
-    - **Below 60% → Reject betting slip recommendation**
-
-- 🔹 **Fallback Rule:**
-  - If no exact sportsbook line exists, select the **closest decimal sportsbook line** that is:
-    - Above the player's projection (e.g., **26.5 pts for a 26 PPG projection**).
-    - If that line doesn’t exist, take the **nearest below projection**.
-
-- Prioritization order:
-  1. **Player-team history** (if available).
-  2. **Current form (last 10 games)**.
-  3. **Season-long performance**.
-
-- Reject only if:
-  • No sportsbook line exists in playerProps.
-  • Confidence overlaps with Watered Bets (**97%+**).
+  - PLAYER CONTEXT
+    - Recent Gamelog:
+      ${JSON.stringify(gameLogs)}
+    - Key Stats:
+      ${JSON.stringify(player.stats)}
+    - Player Props:
+      ${JSON.stringify(playerProps)}
+    - Alternate Lines:
+      ${JSON.stringify(alternateLines[0][sport])}
   
-  # Output Constraints
-  - **Mutually exclusive arrays**: 
-    • Watered bets use only milestone alternative lines.
-    • Betting slip uses only the player's standard sportsbook line.
-  - No confidence overlap.
-  - Watered bets must use whole-number milestones (e.g., 20+ pts).
-  - Betting slip must use decimal sportsbook lines (e.g., 15.5 pts).
-  - Stat abbreviations must match: [${player.stats?.map((s) => s.abbr).join(", ")}].
-  - Only return the JSON asked for, nothing else
-
+  - OPPOSITION DEFENSE
+    ${selectedTeam.name && teamStats !== undefined
+      ? `\n ${selectedTeam.name} defense: ${JSON.stringify(teamStats)}`
+      : "No Team Stats to compare against"}
+  
+  - BETTING PARAMETERS
+    - Betting Style: ${selectedBettingStyle}
+      - Aggressive: +10% boost to projection.
+      - Normal: Use the raw median projection.
+      - Passive: -10% reduction in projection.
+      - Watered: -20% reduction in projection.
+  
+  - ADDITIONAL FACTORS
+    ${extraDetails.length > 0
+        ? `- User-Provided Extra Details:\n ${JSON.stringify(extraDetails)}`
+        : "- No additional details provided"}
+  
+  # Analysis Requirements
+  - PROJECTION MODEL
+    - Weights: Recent Games 60% | Season 10% | Matchup 10% | Style 20%.
+    - **Ensure that projections are generated for ALL alternate markets: ${JSON.stringify(pAlternateMarkets)}**.
+    - Use **Adjusted Median Projection**: 
+      - Standard median projection.
+      - Weight **high-end scoring games (90th percentile) at 15%** to adjust for explosive performances.
+      - Include **low-end performances (10%)** to maintain risk balance.
+    - Validate stats against: ${JSON.stringify(pAlternateMarkets)}.
+  
+  - WATERED BET RULES
+    - Must be an **alternate market option**: ${JSON.stringify(pAlternateMarkets)}.
+    - **Generate at least 4 alternate lines per market** if none exist.
+    - Iterate through **all alternate lines**.
+    - Sample size **≥ 7 games**.
+    - **Include at least two "Over" bets** in Watered Bets.
+    - If no milestone market exists, **select another** that is:
+      - The closest whole number above or below the median projection.
+      - If multiple sportsbooks have different lines, select the **most common line**.
+  
+  - BETTING SLIP RULES
+    - **Ensure that recommendations are generated for ALL alternate markets: ${JSON.stringify(pAlternateMarkets)}**.
+    - **Provide at least one "Over" recommendation per market if justified**.
+  
   # Expected Output
   \`\`\`json
   {
-    "projections": [ {
-      "stat": "<playerStat>",
-      "projection": <medianProjection>,
-      "matchupImpact": "<rationale>"
-    }],
-
-    "wateredBetRecommendation": [ {
-      "market": "<MILESTONEMARKET>", // e.g., "PTS"
-      "recommendation": "<Over/Under> <whole number>",
-      "edge": <boostedEdge>,
-      "confidence": 97.0-100.0,
-      "rationale": "<% hit rates + matchup logic>"
-    }],
-
-    "bettingSlipRecommendation": [ {
-      "market": "<STANDARDMARKET>", // e.g., "PTS"
-      "recommendation": "<Over/Under> <decimal>",
-      "confidence": 72.0-96.9,
-      "rationale": "<median vs line + matchup>"
-    }]
+    "projections": [
+      {
+        "stat": "<playerStat>",
+        "projection": <adjustedProjection>,
+        "matchupImpact": "<rationale>"
+      }
+    ],
+  
+    "wateredBetRecommendation": [
+      {
+        "market": "<MILESTONEMARKET>",
+        "recommendation": "<Over/Under> <whole number>",
+        "edge": <boostedEdge>,
+        "confidence": 90.0-100.0,
+        "rationale": "<% hit rates + matchup logic>"
+      }
+    ],
+  
+    "bettingSlipRecommendation": [
+      {
+        "market": "<STANDARDMARKET>",
+        "recommendation": "<Over/Under> <decimal>",
+        "confidence": <numberValue>,
+        "sportsbook": "<Sportsbook Name>",
+        "odds": "<Best available odds>",
+        "rationale": "<median vs line + matchup>"
+      }
+    ]
   }
   \`\`\`
+  `;
 
-  # Validation Checks
-  - 🔴 Reject output if:
-    1. Betting slip includes a milestone (e.g., 20+ pts)
-    2. Watered bet uses the standard sportsbook line (e.g., 15.5 pts)
-    3. Confidence tiers overlap (e.g., 97% in betting slips)
-  - 🟢 Accept only if:
-    1. Watered bets use whole-number milestone markets (20+ pts).
-    2. Betting slips use only the **exact sportsbook line** (15.5 pts).
-    3. Confidence levels stay strictly within their designated range.
-`;
-
-
-
+    
   // Updated fetchAiResponse with type safety
   type BetRecommendation = {
     market: string;
@@ -237,7 +186,7 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
             market: b.market,
             recommendation: b.recommendation,
             edge: b.edge,
-            confidence: Math.min(100, Math.max(97, b.confidence)), // Enforce watered confidence
+            confidence: Math.min(100, Math.max(90, b.confidence)), // Enforce watered confidence
             sportsbookLines: b.sportsbookLines || [],
             rationale: b.rationale,
           })) || [],
@@ -246,7 +195,7 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
           parsed.bettingSlipRecommendation?.map((b) => ({
             market: b.market,
             recommendation: b.recommendation,
-            confidence: Math.min(100, Math.max(72, b.confidence)), // Enforce betslip range
+            confidence: Math.min(100, Math.max(60, b.confidence)), // Enforce betslip range
             rationale: b.rationale,
           })) || [],
       };

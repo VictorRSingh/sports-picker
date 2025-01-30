@@ -6,10 +6,13 @@ export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const sport = searchParams.get("sport");
   const player = searchParams.get("player");
+  console.log(player)
   const url =
     sport &&
     player &&
-    `https://www.googleapis.com/customsearch/v1?key=AIzaSyDQQaoNak37E03JKVpm5Di5e23vQQ6pVuU&cx=8181e3174b67b4530&q=covers+${sport}+${player}&num=1`;
+    `https://www.googleapis.com/customsearch/v1?key=AIzaSyAsGnxj0zbRhlDujku34zv4iGScr0ABSDs&cx=8181e3174b67b4530&q=covers+${sport}+${player}&num=1`;
+
+    console.log(url);
   try {
     if (url) {
       const response = await axios.get(url, {

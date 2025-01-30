@@ -11,7 +11,7 @@ const PlayerPropsPage = ({ playerProps }: PlayerPropsPageProps) => {
   }, [playerProps]);
   return (
     <div className="flex flex-col gap-4 bg-gray-500 p-2 rounded">
-      {playerProps &&
+      {playerProps.length > 0 &&
         playerProps.map((prop, index) => (
           <div
             key={index + prop.market}
