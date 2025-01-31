@@ -6,8 +6,6 @@ import { useEffect, useState } from "react";
 export function useProps(query: string) {
     const [playerProps, setPlayerProps] = useState<PlayerProps[]>([]);
 
-    console.log(query)
-
     const fetchPlayerProps = async () => {
         try {
             if(!query) {

@@ -1,4 +1,5 @@
 import { BettingStyleEnum } from "@/enums/BettingStyleEnum";
+import { ExploitableLines, Projection, RecommendedBet, WateredBet } from "@/hooks/useAiResponse";
 import { Player } from "@/types/Player";
 import { Team } from "@/types/Team";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
@@ -11,10 +12,22 @@ interface AiPromptsFilterProps {
   setSelectedTeam: Dispatch<SetStateAction<Team>>;
   selectedBettingStyle: BettingStyleEnum;
   setSelectedBettingStyle: Dispatch<SetStateAction<BettingStyleEnum>>;
-  response: string;
-  fetchAiResponse: () => void;
   extraDetails: string[];
   setExtraDetails: Dispatch<SetStateAction<string[]>>;
+  AIResponse: {
+      projections: Projection[];
+      recommendations: RecommendedBet[];
+      wateredBets: WateredBet[];
+      exploitableLines: ExploitableLines[];
+    } | null;
+  setAiResponse: Dispatch<SetStateAction<{
+      projections: Projection[];
+      recommendations: RecommendedBet[];
+      wateredBets: WateredBet[];
+      exploitableLines: ExploitableLines[];
+    } | null>>;
+  fetchAiResponse: (prompt: string | null) => Promise<void>;
+  AiPrompt: string;
 }
 
 const AiPromptsFilter = ({
@@ -24,10 +37,12 @@ const AiPromptsFilter = ({
   setSelectedTeam,
   selectedBettingStyle,
   setSelectedBettingStyle,
-  response,
-  fetchAiResponse,
   extraDetails,
   setExtraDetails,
+  AIResponse,
+  setAiResponse,
+  fetchAiResponse,
+  AiPrompt
 }: AiPromptsFilterProps) => {
   const [extraDetailsInput, setExtraDetailsInput] = useState<string>("");
 
@@ -125,15 +140,17 @@ const AiPromptsFilter = ({
       <div className="w-full">
         <button
           className={`w-full px-2 py-1 rounded ${
-            response ? "bg-green-500 cursor-pointer" : "bg-gray-500 cursor-wait"
+            AIResponse ? "bg-green-500 cursor-pointer" : "bg-gray-500 cursor-wait disabled"
           }`}
           onClick={() => {
-            if (response) {
-              fetchAiResponse();
+            if(AiPrompt) {
+              setAiResponse(null)
+
+              fetchAiResponse(AiPrompt);
             }
           }}
         >
-          {`${response ? "Generate Projections" : "Please Wait"}`}
+          {`${AIResponse !== null ? "Generate Projections" : "Please Wait"}`}
         </button>
       </div>
     </div>

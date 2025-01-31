@@ -15,27 +15,27 @@ export const alternateLines = [
           },
           "3-Pointers Made": {
             "standard": ["X.5"],
-            "alternate": [1, 2, 3, 4, 5, 6, 7, 9]
+            "alternate": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
           },
           "Points + Rebounds + Assists": {
             "standard": ["X.5"],
-            "alternate": [25, 30, 35, 40, 45, 50]
+            "alternate": [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
           },
           "Points + Assists": {
             "standard": ["X.5"],
-            "alternate": [20, 25, 30, 35, 40, 45, 50]
+            "alternate": [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
           },
           "Points + Rebounds": {
             "standard": ["X.5"],
-            "alternate": [20, 25, 30, 35, 40, 45, 50]
+            "alternate": [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
           },
           "Blocks": {
             "standard": ["X.5"],
-            "alternate": [1, 2, 3, 4, 5]
+            "alternate": [0, 1, 2, 3, 4, 5]
           },
           "Steals": {
             "standard": ["X.5"],
-            "alternate": [1, 2, 3, 4, 5]
+            "alternate": [0, 1, 2, 3, 4, 5]
           }
         },
         "NFL": {

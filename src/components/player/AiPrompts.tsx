@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+
 import { Gamelog } from "@/types/Gamelog";
 import { Player } from "@/types/Player";
 import AiPromptsFilter from "./AiPromptsFilter";
@@ -11,6 +11,13 @@ import { BettingStyleEnum } from "@/enums/BettingStyleEnum";
 import PlayerProjections from "./PlayerProjections";
 import { PlayerProps } from "@/types/PlayerProps";
 import { alternateLines } from "../../../public/data/AlternateLines";
+import {
+  ExploitableLines,
+  Projection,
+  RecommendedBet,
+  useAiResponse,
+  WateredBet,
+} from "@/hooks/useAiResponse";
 
 interface AiPromptsProps {
   gameLogs: Gamelog;
@@ -19,9 +26,21 @@ interface AiPromptsProps {
 }
 
 const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
-  const pathname = usePathname();
-  const sport = pathname.split("/")[2].toUpperCase() as keyof typeof alternateLines[0];
+  const [AIResponse, setAIResponse] = useState<{
+    projections: Projection[];
+    recommendations: RecommendedBet[];
+    wateredBets: WateredBet[];
+    exploitableLines: ExploitableLines[];
+  } | null>(null);
 
+  const [AIPrompt, setAIPrompt] = useState<string>();
+  const exploitableLinePercent = 8;
+  const { response, fetchAiResponse } = useAiResponse();
+
+  const pathname = usePathname();
+  const sport = pathname
+    .split("/")[2]
+    .toUpperCase() as keyof (typeof alternateLines)[0];
   const { teams } = useTeam(pathname.replace("/p", "").split("/")[1]);
   const { teamStats, fetchTeamStats } = useTeamStats();
   const [selectedTeam, setSelectedTeam] = useState<Team>({
@@ -35,187 +54,10 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
     useState<BettingStyleEnum>(BettingStyleEnum.normal);
 
   const [extraDetails, setExtraDetails] = useState<string[]>([]);
-
-  const [response, setResponse] = useState<any>();
-
-  const genAI = new GoogleGenerativeAI(
-    "AIzaSyA3nMt9_5UiaPVevkUYavZEpuPeIZFAWrc"
-  );
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-8b-exp-0924" });
-
-  const pPlayerStats = player.stats && player.stats?.flatMap(player => player.name);
-  const pPlayerMarkets = playerProps && playerProps.flatMap(prop => prop.market);
-  const pAlternateMarkets = Object.keys(alternateLines[0][sport]);
-  console.log("pAlternateMarkets", pAlternateMarkets)
-  console.log("PlayerStats", pPlayerStats);
-  console.log("PlayerMarkets", pPlayerMarkets);
-
-  const prompt = `You are a sports betting assistant analyzing player prop bets. You are analyzing a player in the nba. Provide an expected range of outcomes and a betting suggestion based on historical trends, defensive matchups, and sportsbook odds for ${player.name}.
-
-  # Core Inputs
-  - PLAYER CONTEXT
-    - Recent Gamelog:
-      ${JSON.stringify(gameLogs)}
-    - Key Stats:
-      ${JSON.stringify(player.stats)}
-    - Player Props:
-      ${JSON.stringify(playerProps)}
-    - Alternate Lines:
-      ${JSON.stringify(alternateLines[0][sport])}
-  
-  - OPPOSITION DEFENSE
-    ${selectedTeam.name && teamStats !== undefined
-      ? `\n ${selectedTeam.name} defense: ${JSON.stringify(teamStats)}`
-      : "No Team Stats to compare against"}
-  
-  - BETTING PARAMETERS
-    - Betting Style: ${selectedBettingStyle}
-      - Aggressive: +10% boost to projection.
-      - Normal: Use the raw median projection.
-      - Passive: -10% reduction in projection.
-      - Watered: -20% reduction in projection.
-  
-  - ADDITIONAL FACTORS
-    ${extraDetails.length > 0
-        ? `- User-Provided Extra Details:\n ${JSON.stringify(extraDetails)}`
-        : "- No additional details provided"}
-  
-  # Analysis Requirements
-  - PROJECTION MODEL
-    - Weights: Recent Games 60% | Season 10% | Matchup 10% | Style 20%.
-    - **Ensure that projections are generated for ALL alternate markets: ${JSON.stringify(pAlternateMarkets)}**.
-    - Use **Adjusted Median Projection**: 
-      - Standard median projection.
-      - Weight **high-end scoring games (90th percentile) at 15%** to adjust for explosive performances.
-      - Include **low-end performances (10%)** to maintain risk balance.
-    - Validate stats against: ${JSON.stringify(pAlternateMarkets)}.
-  
-  - WATERED BET RULES
-    - Must be an **alternate market option**: ${JSON.stringify(pAlternateMarkets)}.
-    - **Generate at least 4 alternate lines per market** if none exist.
-    - Iterate through **all alternate lines**.
-    - Sample size **≥ 7 games**.
-    - **Include at least two "Over" bets** in Watered Bets.
-    - If no milestone market exists, **select another** that is:
-      - The closest whole number above or below the median projection.
-      - If multiple sportsbooks have different lines, select the **most common line**.
-  
-  - BETTING SLIP RULES
-    - **Ensure that recommendations are generated for ALL alternate markets: ${JSON.stringify(pAlternateMarkets)}**.
-    - **Provide at least one "Over" recommendation per market if justified**.
-  
-  # Expected Output
-  \`\`\`json
-  {
-    "projections": [
-      {
-        "stat": "<playerStat>",
-        "projection": <adjustedProjection>,
-        "matchupImpact": "<rationale>"
-      }
-    ],
-  
-    "wateredBetRecommendation": [
-      {
-        "market": "<MILESTONEMARKET>",
-        "recommendation": "<Over/Under> <whole number>",
-        "edge": <boostedEdge>,
-        "confidence": 90.0-100.0,
-        "rationale": "<% hit rates + matchup logic>"
-      }
-    ],
-  
-    "bettingSlipRecommendation": [
-      {
-        "market": "<STANDARDMARKET>",
-        "recommendation": "<Over/Under> <decimal>",
-        "confidence": <numberValue>,
-        "sportsbook": "<Sportsbook Name>",
-        "odds": "<Best available odds>",
-        "rationale": "<median vs line + matchup>"
-      }
-    ]
-  }
-  \`\`\`
-  `;
-
-    
-  // Updated fetchAiResponse with type safety
-  type BetRecommendation = {
-    market: string;
-    recommendation: string;
-    edge: string;
-    confidence: number;
-    sportsbookLines?: string[];
-    rationale?: string;
-  };
-
-  type Projection = {
-    stat: string;
-    projection: number;
-    matchupImpact: string;
-  };
-
-  const fetchAiResponse = async () => {
-    try {
-      setResponse(undefined);
-      const result = await model.generateContent(prompt);
-      const rawResponse = result.response.text();
-
-      // Type-safe parsing
-      const jsonMatch = rawResponse.match(/```json([\s\S]*?)```/);
-      const formattedResponse = jsonMatch ? jsonMatch[1].trim() : rawResponse;
-
-      const parsed = JSON.parse(formattedResponse) as {
-        projections?: Projection[];
-        wateredBetRecommendation?: BetRecommendation[];
-        bettingSlipRecommendation?: BetRecommendation[];
-      };
-
-      // Normalize responses with fallbacks
-      const finalResponse = {
-        projections:
-          parsed.projections?.map((p) => ({
-            stat: p.stat,
-            projection: p.projection || 0,
-            matchupImpact: p.matchupImpact || "",
-          })) || [],
-
-        wateredBetRecommendation:
-          parsed.wateredBetRecommendation?.map((b) => ({
-            market: b.market,
-            recommendation: b.recommendation,
-            edge: b.edge,
-            confidence: Math.min(100, Math.max(90, b.confidence)), // Enforce watered confidence
-            sportsbookLines: b.sportsbookLines || [],
-            rationale: b.rationale,
-          })) || [],
-
-        bettingSlipRecommendation:
-          parsed.bettingSlipRecommendation?.map((b) => ({
-            market: b.market,
-            recommendation: b.recommendation,
-            confidence: Math.min(100, Math.max(60, b.confidence)), // Enforce betslip range
-            rationale: b.rationale,
-          })) || [],
-      };
-
-      setResponse(finalResponse);
-    } catch (err) {
-      console.error("Processing Error:", err);
-      // Consider error state handling
-    }
-  };
-
-  useEffect(() => {
-    console.log(prompt);
-  }, [prompt]);
-
-  useEffect(() => {
-    if (!response) {
-      fetchAiResponse();
-    }
-  }, [response]);
+  const pPlayerMarkets =
+    playerProps &&
+    playerProps.flatMap((prop) => prop.market.replace("Odds", ""));
+  const pAlternateMarkets = alternateLines[0][sport];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -225,10 +67,150 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
     };
 
     fetchData();
+
+    console.log(JSON.stringify(
+      teamStats?.rows.find((row) => row.columns[0].text.includes(selectedTeam.name))
+    ))
   }, [selectedTeam]);
 
+  useEffect(() => {
+    console.log("AIResponse", AIResponse)
+  }, [AIResponse])
+
+  useEffect(() => {
+    if (player && gameLogs) {
+      const prompt = `
+      You are a professional sports betting assistant for ${sport}, analyzing player props and market values for future games. Your goal is to provide **accurate player projections**, **high-value bet recommendations**, and **safe alternative bets (watered-down bets).**  
+      Additionally, you must **identify sportsbook lines that can be exploited** based on inefficiencies in the offered odds.
+      
+      ## 🔎 **PLAYER CONTEXT**
+      - **Player**: ${player.name}
+      - **Recent Game Logs**: ${JSON.stringify(gameLogs)}
+      - **Available Markets**: ${JSON.stringify(pPlayerMarkets)}
+      - **Sportsbooks Lines** (Official player props lines): ${JSON.stringify(playerProps)}
+      - **Alternate Betting Lines** (Lower, safer options): ${JSON.stringify(pAlternateMarkets)}
+      
+      ## 📊 **BETTING CONTEXT**
+      - **Betting Style**: ${selectedBettingStyle}
+        - **Aggressive:** +5% projection boost.
+        - **Normal:** Use median projection.
+        - **Passive:** -5% projection reduction.
+      
+      ${
+        selectedTeam
+          ? `## ⚔ **MATCHUP CONTEXT**
+        - ${player.name} is playing against **${selectedTeam.name}**.
+        - **Defensive Stats for ${selectedTeam.name}:** 
+        - ${JSON.stringify(
+          teamStats?.rows.find((row) => row.columns[0].text.includes(selectedTeam.name))
+        )}`
+          : "No opposition matchup available."
+      }
+      
+      ## 📈 **PROJECTION REQUIREMENTS**
+      - **Calculate projections** for each available market based on:
+        - **40% Weight** → Recent Game Averages
+        - **20% Weight** → Season Averages
+        - **20% Weight** → Defensive Matchup
+        - **20% Weight** → Betting Style Adjustments
+      - Provide **confidence ratings** (0-100%) for each market.
+      - Include **matchup impact** and reasoning.
+      
+      ## ⚠ **IDENTIFYING EXPLOITABLE LINES**
+      - **Compare AI projections to sportsbook lines.**
+      - **Flag any lines where AI projection differs by 8-20% or more from the sportsbook line.**
+        - If **AI projection is 8-20%+ higher than the sportsbook line**, recommend **OVER**.
+        - If **AI projection is 8-20%+ lower than the sportsbook line**, recommend **UNDER**.
+      - **Only recommend bets where AI confidence is above 70%**.
+      - If the **sportsbook line is exactly equal to AI's projection**, do not bet.
+      - If **alternate lines exist that provide a safer but still profitable bet**, prioritize them.
+      
+      ## 🎯 **BET RECOMMENDATION REQUIREMENTS (50%)**
+      - **Select 50% of the available markets as bet recommendations.**
+      - **Find the closest sportsbook line that is BELOW or equal to the AI projection.**
+      - **DO NOT** pick a sportsbook line that is **above** the AI projection.
+      - Prioritize bets where **confidence is >80%** and the sportsbook line is inefficient.
+      - Structure response as:
+        - market: Name of the stat.
+        - confidence: Confidence percentage.
+        - recommendation: The **closest sportsbook line that is below or equal to the projection**.
+        - reasoning: Explanation of why this bet is valuable.
+      
+      ## ✅ **WATERED BET REQUIREMENTS (50%)**
+      - **Select 50% of available markets for watered-down bets.**
+      - **WAtered Bets alternate line CANNOT be higher than sportsbooks line.**
+      - **Find the closest alternate line that is BELOW the sportsbook line.**
+      - **DO NOT pick an alternate line that is above the sportsbook line.**
+      - **Prioritize stats that appear most frequently in GameLogs (most data available).**
+      - **Watered bets must reduce risk but maintain confidence above 80%.**
+      - Structure response as:
+        - market: Name of the stat.
+        - confidence: Confidence percentage.
+        - alternate: The **highest available alternate line that is still below the sportsbook line**.
+        - reasoning: Explanation for choosing the alternate.
+      
+      ## 🔍 **EXPECTED OUTPUT**
+      \`\`\`json
+      [
+        "projections": [
+          {
+            "stat": "<playerStat>",
+            "projection": <adjustedProjection>,
+            "confidence": <confidence as percentage>,
+            "matchupImpact": "<rationale>"
+          }
+        ],
+        "recommendations": [
+          {
+            "market": "<playerStat>",
+            "confidence": <confidence>,
+            "recommendation": <sportsbookLine>,
+            "reasoning": "<rationale>"
+          }
+        ],
+        "wateredBets": [
+          {
+            "market": "<playerStat>",
+            "confidence": <confidence>,
+            "alternate": <alternateLine>,
+            "reasoning": "<rationale>"
+          }
+        ],
+        "exploitableLines": [
+          {
+            "market": "<playerStat>",
+            "sportsbookLine": <sportsbookOfferedLine>,
+            "aiProjection": <aiCalculatedProjection>,
+            "difference": "<% difference between sportsbook line and AI projection>",
+            "bet": "OVER" | "UNDER" | "NO BET",
+            "reasoning": "<explanation of inefficiency>"
+          }
+        ]
+    ]
+      \`\`\`
+      `
+      
+;
+      if (prompt) {
+        setAIPrompt(prompt);
+      }
+    }
+  }, [player, gameLogs]);
+
+  useEffect(() => {
+    if (AIPrompt) {
+      fetchAiResponse(AIPrompt);
+    }
+  }, [AIPrompt]);
+
+  useEffect(() => {
+    if (response) {
+      setAIResponse(response);
+    }
+  }, [response]);
+
   return (
-    <div className="flex flex-col lg:flex-row">
+    <div className="flex flex-col lg:flex-row h-full">
       {teams && selectedTeam && setSelectedTeam && (
         <div className="flex flex-col gap-x-2 min-w-60 lg:max-w-60">
           <AiPromptsFilter
@@ -238,29 +220,28 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
             setSelectedTeam={setSelectedTeam}
             selectedBettingStyle={selectedBettingStyle}
             setSelectedBettingStyle={setSelectedBettingStyle}
-            response={response}
-            fetchAiResponse={fetchAiResponse}
             extraDetails={extraDetails}
             setExtraDetails={setExtraDetails}
+            AIResponse={AIResponse!}
+            setAiResponse={setAIResponse}
+            fetchAiResponse={fetchAiResponse!}
+            AiPrompt={AIPrompt!}
           />
         </div>
       )}
 
-      {response !== undefined ? (
-        <div className="p-2 flex-grow w-full">
-          <div className="grid grid-cols-2 gap-4 items-center">
-            <div className="col-span-full mt-4">
-              {response && (
-                <PlayerProjections
-                  data={response}
-                  selectedTeam={selectedTeam}
-                />
-              )}
+      {AIResponse && AIResponse?.projections.length > 0 ? (
+        <div className="mt-4">
+          <PlayerProjections data={AIResponse} selectedTeam={selectedTeam} />
+        </div>
+      ) : (
+        <div className="flex justify-center items-center w-full h-full">
+          <div className="flex flex-col gap-y-2 h-full items-center justify-center">
+            <div className="flex items-center gap-x-2">
+              <span>Loading AI Projections...</span>
             </div>
           </div>
         </div>
-      ) : (
-        "Loading predictions..."
       )}
     </div>
   );

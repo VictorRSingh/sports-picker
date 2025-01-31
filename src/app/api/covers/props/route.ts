@@ -84,7 +84,6 @@ export async function GET(request: NextRequest) {
               });
             });
           playerProps.push(playerProp);
-          console.log(playerProps);
         });
       return NextResponse.json(playerProps);
     }
