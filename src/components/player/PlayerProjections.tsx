@@ -20,8 +20,6 @@ const PlayerProjections = (props: { data: any; selectedTeam: Team }) => {
     }
   };
 
-  console.log(props.data);
-
   return (
     <div className="p-3 bg-gray-50 rounded-lg space-y-8 w-full">
       {/* Projections Section */}
@@ -29,7 +27,7 @@ const PlayerProjections = (props: { data: any; selectedTeam: Team }) => {
         <h2 className="text-2xl font-bold mb-4 text-gray-800">
           Player Projections
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {props.data.projections
             ?.sort((a: any, b: any) => b.projection - a.projection)
             .map((proj: any, index: number) => (
@@ -60,7 +58,7 @@ const PlayerProjections = (props: { data: any; selectedTeam: Team }) => {
         <h2 className="text-2xl font-bold mb-4 text-gray-800">
           Betting Slip Recommendations
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {props.data.recommendations
             .sort((a: any, b: any) => b.confidence - a.confidence)
             .map((bet: any, index: number) => (
@@ -98,7 +96,7 @@ const PlayerProjections = (props: { data: any; selectedTeam: Team }) => {
         <h2 className="text-2xl font-bold mb-4 text-gray-800">
           Watered/High Confidence Bets
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {props.data.wateredBets
             .sort((a: any, b: any) => b.confidence - a.confidence)
             .map((bet: any, index: number) => (
@@ -136,7 +134,7 @@ const PlayerProjections = (props: { data: any; selectedTeam: Team }) => {
         <h2 className="text-2xl font-bold mb-4 text-gray-800">
           Exploitable Lines
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {props.data.exploitableLines.map((bet: any, index: number) => (
             <div
               key={bet.market}
@@ -154,6 +152,13 @@ const PlayerProjections = (props: { data: any; selectedTeam: Team }) => {
                 <p className="text-xl text-blue-600 font-bold">
                   Projected: {bet.aiProjection}
                 </p>
+                <p
+                    className={`font-bold text-lg italic ${confidenceColor(
+                      bet.confidence
+                    )}`}
+                  >
+                    {bet.confidence}% Confidence
+                  </p>
                 <p className={`font-bold text-lg ${betColor(bet.bet)}`}>
                   <span>
                     {bet.difference} {bet.bet}
