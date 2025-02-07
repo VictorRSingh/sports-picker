@@ -75,178 +75,138 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
   useEffect(() => {
     if (player && gameLogs) {
       const prompt = `
-      You are a professional sports betting assistant for ${sport}, analyzing player props and market values for future games. Your goal is to provide **accurate player projections**, **high-value bet recommendations**, and **safe alternative bets (watered-down bets).**  
-      Additionally, you must **identify sportsbook lines that can be exploited** based on inefficiencies in the offered odds.  Only select bets where it applies to the players position: ${player.details?.position}
+      You are a sports betting analyst for ${sport} evaluating ${player.name}. Use ONLY the following data and rules:
       
-      ## 🔎 **PLAYER CONTEXT**
-      - **Player**: ${player.name}
-      - **Season's Game Logs**: ${JSON.stringify(gameLogs)}
-      - **Available Markets**: ${JSON.stringify(pPlayerMarkets)}
-      - **Sportsbooks Lines** (Official player props lines): ${JSON.stringify(playerProps)}
-      - **Alternate Betting Lines** (Lower, safer options): ${JSON.stringify(pAlternateMarkets)}
+      ## 📊 DATA SOURCES
+      - Game Logs: ${JSON.stringify(gameLogs)}
+      - Markets to Project: ${JSON.stringify(pPlayerMarkets)}
+      - Sportsbook Lines: ${JSON.stringify(playerProps)}
+      - Alternate Lines: ${JSON.stringify(pAlternateMarkets)}
+      ${selectedTeam.name ? `- Opponent Defense: ${JSON.stringify(teamStats!.rows.find(r => r.columns[0].text.includes(selectedTeam.name)))}` : ''}
       
-      ## 📊 **BETTING CONTEXT**
-      - **Betting Style**: ${selectedBettingStyle}
-        - **Aggressive:** +5% projection boost (StyleMultiplier = 1.05)
-        - **Normal:** Use median projection (StyleMultiplier = 1.00)
-        - **Passive:** -5% projection reduction (StyleMultiplier = 0.95)
+      ## 🎯 PROJECTION RULES
+      1. For EACH market in pPlayerMarkets:
+         a. Calculate MEDIAN of ALL games 
+         (${JSON.stringify(gameLogs.headers)})
+         (${JSON.stringify(gameLogs)})
+         b. Calculate MEDIAN of LAST RECENT 5 games: 
+         (${JSON.stringify(gameLogs.headers)})
+         (${JSON.stringify(gameLogs.rows.slice(0, 5))})
+         c. Final Projection = Weighted Average:
+            (SeasonMedian * 0.6) + (Recent5Median * 0.4)
+            
+         d. Confidence = (% of games where player hit ≥ Final Projection) * 100
+            - If Confidence < 80%: 
+               i. Reduce projection by 0.5 increments
+              ii. Recalculate Confidence
+             iii. Repeat until Confidence ≥ 90%
+         e. For NBA: Do not confused FG(Field Goals) for 3FG (Three's Field Goals)
       
-      ${
-        selectedTeam.name
-          ? `## ⚔ **MATCHUP CONTEXT**
-        - ${player.name} is playing against **${selectedTeam.name}**.
-        - **Defensive Stats for ${selectedTeam.name}:** 
-        - ${JSON.stringify(
-          teamStats?.rows.find((row) => row.columns[0].text.includes(selectedTeam.name))
-        )}`
-          : "No opposition matchup available."
-      }
+      
+      ## 💰 BET RECOMMENDATION RULES
+      For EACH sportsbook line in ${JSON.stringify(playerProps)}:
+      1. Calculate Edge = (Projection - SportsbookLine) / SportsbookLine * 100
+      2. Recommendation:
+         - OVER if Edge ≥ +5% AND Confidence ≥75%
+         - UNDER if Edge ≤ -5% AND Confidence ≥75%
+         - NO BET otherwise
+      3. Required in output:
+         - Confidence must be ≥75%
+         - Clear math showing Edge calculation
+      
+      ## 🎯 EXPLOITABLE LINES RULES
+      1. For EACH sportsbook line:
+         a. Calculate Value Gap = ((Projection - SportsbookLine) / SportsbookLine) * 100
+         b. Requirements:
+            - OVER if Value Gap ≥ +8% AND Confidence ≥70%
+            - UNDER if Value Gap ≤ -8% AND Confidence ≥70%
+            - NO BET if between -8% to +8%
+         c. Must show:
+            - Original sportsbook line
+            - AI projection comparison
+            - Gap percentage
+      
+      ## 🚰 WATERED BETS RULES
+      For EACH alternate line in ${JSON.stringify(pAlternateMarkets)}:
+      1. Sort alternate lines DESCENDING (highest to lowest)
+      2. For EACH line in sorted list:
+         a. Calculate EXACT hit rate using LAST 10 GAMES:
+            ${JSON.stringify(gameLogs.rows.slice(0, 9))}
+         b. Validate STRICT conditions:
+            - Line MUST BE < Projection
+            - Minimum 8/10 hits (80%) for "High Confidence"
+            - Minimum 6/10 hits (60%) for "Medium Confidence"
+      3. Selection Priority:
+         a. First: Highest line with ≥80% hit rate
+         b. Second: Next highest line with ≥70% hit rate
+         c. Third: Highest line with ≥60% hit rate
+      4. Anti-Error Measures:
+         - DOUBLE-CHECK actual game log numbers against line
+         - REJECT any line where projection < line
+         - FLAG discrepancies >15% between calculated/claimed hit rates
 
-      ## **EXTRA DETAILS**
-        - If ${sport} === NFL, take these details into consideration:
-          - RYDS = Rushing Yards
-          - RECYDS = Receiving Yards
-          - RTD = Rushing Touchdowns
-          - RECTD = Receiving Touchdowns
-          - RAVG = Rushing Average
-        ${extraDetails.length > 0 && extraDetails.map(detail => `- ${detail}\n`)}
+      ## VALIDATION EXAMPLE: LEBRON JAMES LAST 10
+      Assists Log: ${JSON.stringify([8,8,12,9,8,6,11,13,5,7])}
+      Rebounds Log: ${JSON.stringify([7,11,3,8,7,14,10,5,7,6])}
 
-      ## 📈 **PROJECTION REQUIREMENTS**
-      - **Calculate projections** for each available market using:
-        \`\`\`
-        Base Projection = 
-          (RecentAvg × 0.4) + 
-          (SeasonAvg × 0.2) + 
-          (RecentAvg × (1 + MatchupFactor) × 0.2)
-        
-        Final Projection = Round(Base Projection × StyleMultiplier, 1)
-        **Validate your projections against players sportsbooks lines ${JSON.stringify(playerProps)}**
-        \`\`\`
-      
-        Where:
-        - **RecentAvg**: 
-          IF <5 games available: 
-            - Use all available games + note "Small sample size" in confidence
-          ELSE: 
-            - Use last 10 games (${JSON.stringify(gameLogs.rows.slice(0, 10))})
-            - if first Gamelog has same date as ${JSON.stringify(Date.now())}, ignore this GameLog as this game is currently ongoing
-        
-        - **SeasonAvg**: 
-          Calculate from FULL season data (${JSON.stringify(gameLogs)}), 
-          NOT recent game logs
-        
-        - **MatchupFactor**:
-          IF ${sport} = NBA: 
-            Opponent Rank Scale = 30 teams
-          ELSE:
-            Opponent Rank Scale = League total teams
+      Assists Analysis:
+      - 8+ assists: 9/10 games (90%)
+      - 10+ assists: 3/10 games (30%)
+
+      Rebounds Analysis: 
+      - 10+ rebounds: 3/10 games (30%)
+      - 8+ rebounds: 6/10 games (60%)
           
-          MatchupStrength = 1 - (OpponentRank / TotalTeams)
-        
-        - **Confidence Calculation**:
-          \`\`\`
-          Consistency = 1 - (Stdev(Recent 5 Games) / RecentAvg)
-          IF Stdev = 0: 
-            Max confidence penalty 10% for perfect consistency
-          
-          Final Confidence = 
-            ((Consistency × 0.6) + (MatchupStrength × 0.4)) × StyleMultiplier
-            THEN clamp between 50-95%
-          \`\`\`
-      
-      ## ⚠ **IDENTIFYING EXPLOITABLE LINES**
-      - **Difference Calculation**:
-        \`\`\`
-        ((AI Projection - Sportsbook Line) / Sportsbook Line) × 100
-        \`\`\`
-        
-      - **Bet Thresholds**:
-        - OVER if ≥+8% difference
-        - UNDER if ≤-8% difference
-        - NO BET if between -8% to +8%
-        
-      - **Only recommend bets where AI confidence is above 70%**.
-      - If **alternate lines exist that provide a safer but still profitable bet**, prioritize them.
-      
-      ## 🎯 **BET RECOMMENDATION REQUIREMENTS (50%)**
-      - **Select 50% of the available markets as bet recommendations**.
-      - **Line Selection**:
-        1. Filter lines ≤ projection
-        2. Remove lines >10% below projection
-        3. Select closest to projection
-        
-      - **Minimum Requirements**:
-        - Projection must exceed line by ≥3% 
-        - Confidence ≥70%
-        
-      - Structure response as:
-        \`\`\`json
-        {
-          "market": "<playerStat>",
-          "confidence": <confidence>,
-          "recommendation": <sportsbookLine>,
-          "reasoning": "<rationale>"
-        }
-        \`\`\`
-      
-      ## ✅ **WATERED BET REQUIREMENTS (50%)**
-      - **Select 50% of available markets for watered-down bets**.
-      - **Alternate Line Selection**:
-        1. Filter alternates < sportsbook line
-        2. Sort DESC
-        3. Select first entry where:
-           Alternate ≤= Projection
-        
-      - Structure response as:
-        \`\`\`json
-        {
-          "market": "<playerStat>",
-          "confidence": <confidence>,
-          "alternate": <alternateLine>,
-          "reasoning": "<rationale>"
-        }
-        \`\`\`
-      
-      ## 🔍 **EXPECTED OUTPUT**
+      ## 📝 REQUIRED OUTPUT
       \`\`\`json
       {
         "projections": [
           {
-            "stat": "<playerStat>",
-            "projection": <adjustedProjection>,
-            "confidence": <confidence as percentage>,
-            "matchupImpact": "<rationale>"
+            "market": "Points",
+            "medianProjection": 22.5,
+            "confidence": 92,
+            "calculationSteps": "Season Median: 22.0 | Last5 Median: 23.5 | Weighted: 22.6 → Adjusted to 22.5 for 90% confidence"
           }
         ],
         "recommendations": [
           {
-            "market": "<playerStat>",
-            "confidence": <confidence>,
-            "recommendation": <sportsbookLine>,
-            "reasoning": "<rationale>"
-          }
-        ],
-        "wateredBets": [
-          {
-            "market": "<playerStat>",
-            "confidence": <confidence>,
-            "alternate": <alternateLine>,
-            "reasoning": "<rationale>"
+            "market": "Points",
+            "sportsbookLine": 21.5,
+            "recommendation": "OVER",
+            "confidence": 92,
+            "edge": "+4.65%",
+            "math": "(22.5-21.5)/21.5 = +4.65%"
           }
         ],
         "exploitableLines": [
           {
-            "market": "<playerStat>",
-            "sportsbookLine": <sportsbookOfferedLine>,
-            "aiProjection": <aiCalculatedProjection>,
-            "difference": "<% difference between sportsbook line and AI projection>",
-            "bet": "OVER" | "UNDER" | "NO BET",
-            "reasoning": "<explanation of inefficiency>",
-            "confidence": <confidence>
+            "market": "Points",
+            "sportsbookLine": 19.5,
+            "aiProjection": 22.5,
+            "difference": "+15.38%",
+            "bet": "OVER",
+            "reasoning": "Sportsbook line 19.5 vs AI 22.5 (+15.4% gap)",
+            "confidence": 92
+          }
+        ],
+        "wateredBets": [
+          {
+            "market": "Points",
+            "hitRate": 85,
+            "hitRateDetails: "(7/10 games)"
+            "alternateLine": 20,
+            "projectionComparison": "22.5 vs 20"
           }
         ]
       }
       \`\`\`
+      
+      ## ⚠️ STRICT VALIDATION
+      - REJECT any projection using mean averages
+      - FLAG any confidence calculations using normal distribution
+      - VERIFY all medians against raw game logs
+      - ENFORCE 0.5 increment adjustments for confidence
+      - DOUBLE-CHECK matchup data aligns with ${selectedTeam.name} stats
       `;
       if (prompt) {
         setAIPrompt(prompt);
@@ -256,6 +216,7 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
 
   useEffect(() => {
     if (AIPrompt) {
+      console.log(AIPrompt)
       fetchAiResponse(AIPrompt);
     }
   }, [AIPrompt]);

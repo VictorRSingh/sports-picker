@@ -12,58 +12,59 @@ import PlayerGraph from "@/components/player/PlayerGraph";
 import AiPrompts from "@/components/player/AiPrompts";
 import PlayerPropsPage from "@/components/player/PlayerProps";
 import { useProps } from "@/hooks/useProps";
-
-type Tab = "stats" | "gamelog" | "analytics" | "ai" | "props"; // Matches PlayerSubNavProps
+import { PlayerSubnavLinksEnum } from "@/enums/PlayerSubnavLinksEnum";
+import { Player } from "@/types/Player";
 
 const PlayerPage = () => {
   const pathname = usePathname();
   const { player } = usePlayer(pathname.replace("/p", ""));
-  const { gameLogs } = useGameLog(player!);
-  const { playerProps, fetchPlayerProps } = useProps(player?.webUrl.replace("-player", "").replace("-", "+")!);
-  const [activeTab, setActiveTab] = useState<Tab>("stats");
-  // Default to the first numeric stat
+  const { gameLogs } = useGameLog(player as Player);
   const [selectedStat, setSelectedStat] = useState<string>("");
-  
+  const { playerProps } = useProps(player?.webUrl!) 
+  const [activeTab, setActiveTab] = useState<PlayerSubnavLinksEnum>(
+    PlayerSubnavLinksEnum.Stats
+  );
+
   const renderContent = () => {
     if (player && gameLogs) {
       switch (activeTab) {
-        case "stats":
+        case PlayerSubnavLinksEnum.Stats:
           return <PlayerStats player={player} />;
-        case "gamelog":
+        case PlayerSubnavLinksEnum.Gamelog:
           return <GameLog player={player} gameLogs={gameLogs} />;
-        case "analytics":
-          return <PlayerGraph gameLogs={gameLogs} selectedStat={selectedStat} setSelectedStat={setSelectedStat}/>;
-        case "ai":
-          return <AiPrompts gameLogs={gameLogs} player={player} playerProps={playerProps} />
-        case "props": 
-          return <PlayerPropsPage playerProps={playerProps} />
+        case PlayerSubnavLinksEnum.Analytics:
+          return (
+            <PlayerGraph
+              gameLogs={gameLogs}
+              selectedStat={selectedStat}
+              setSelectedStat={setSelectedStat}
+            />
+          );
+        case PlayerSubnavLinksEnum.AI:
+          return (
+            <AiPrompts
+              gameLogs={gameLogs}
+              player={player}
+              playerProps={playerProps}
+            />
+          );
+        case PlayerSubnavLinksEnum.Props:
+          return <PlayerPropsPage playerProps={playerProps} />;
         default:
           return null;
       }
     }
   };
 
+  console.log(player);
 
   return (
     <>
-      {player && gameLogs ? (
+      {player && (
         <div className="flex flex-col gap-y-4 w-full justify-center">
           <PlayerSubNav activeTab={activeTab} setActiveTab={setActiveTab} />
           <PlayerHeader player={player} />
           <div className="overflow-x-auto h-full">{renderContent()}</div>
-        </div>
-      ) : (
-        <div className="flex justify-center items-center w-full h-full">
-          <div className="flex flex-col gap-y-2">
-            <div className="flex items-center gap-x-2">
-              <span>Loading player data...</span>
-              {player && <span className="text-green-500">✓</span>}
-            </div>
-            <div className="flex items-center gap-x-2">
-              <span>Loading game logs...</span>
-              {gameLogs && <span className="text-green-500">✓</span>}
-            </div>
-          </div>
         </div>
       )}
     </>

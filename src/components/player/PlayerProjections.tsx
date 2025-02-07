@@ -8,7 +8,6 @@ const PlayerProjections = (props: { data: any; selectedTeam: Team }) => {
     return "text-red-600";
   };
 
-
   const betColor = (bet: any) => {
     switch (bet) {
       case "UNDER":
@@ -19,6 +18,15 @@ const PlayerProjections = (props: { data: any; selectedTeam: Team }) => {
         return "text-neutral-700";
     }
   };
+
+  const hitRateColor = (hitRate: any) => {
+    console.log(hitRate);
+    if (hitRate >= 75) return "text-green-600";
+    if (hitRate >= 65) return "text-yellow-600";
+    return "text-red-600";
+  }
+
+  console.log(props.data.wateredBets);
 
   return (
     <div className="p-3 bg-gray-50 rounded-lg space-y-8 w-full">
@@ -32,20 +40,27 @@ const PlayerProjections = (props: { data: any; selectedTeam: Team }) => {
             ?.sort((a: any, b: any) => b.projection - a.projection)
             .map((proj: any, index: number) => (
               <div
-                key={proj.stat}
+                key={index + proj.market}
                 className="bg-white p-4 rounded-lg shadow-sm border border-gray-200"
               >
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="text-lg font-semibold text-gray-700">
-                    {proj.stat}
+                    {proj.market}
                   </h3>
                 </div>
                 <div className="space-y-2">
                   <p className="text-blue-600 font-bold text-xl">
-                    Projection: {proj.projection}
+                    Projection: {proj.medianProjection}
+                  </p>
+                  <p
+                    className={`font-bold text-lg italic ${confidenceColor(
+                      proj.confidence
+                    )}`}
+                  >
+                    {proj.confidence}% Confidence
                   </p>
                   <p className="text-sm text-gray-600 italic">
-                    {props.selectedTeam.name && `"${proj.matchupImpact}"`}
+                    {`"${proj.calculationSteps}"`}
                   </p>
                 </div>
               </div>
@@ -63,7 +78,7 @@ const PlayerProjections = (props: { data: any; selectedTeam: Team }) => {
             .sort((a: any, b: any) => b.confidence - a.confidence)
             .map((bet: any, index: number) => (
               <div
-                key={bet.market}
+                key={index + bet.market}
                 className="bg-white p-4 rounded-lg shadow-sm border border-gray-200"
               >
                 <div className="flex justify-between items-start mb-2">
@@ -72,6 +87,9 @@ const PlayerProjections = (props: { data: any; selectedTeam: Team }) => {
                   </h3>
                 </div>
                 <div className="space-y-2">
+                  <p className="text-xl text-black font-bold">
+                    Line: {bet.sportsbookLine}
+                  </p>
                   <p className="text-xl text-black font-bold">
                     Recommended: {bet.recommendation}
                   </p>
@@ -83,7 +101,7 @@ const PlayerProjections = (props: { data: any; selectedTeam: Team }) => {
                     {bet.confidence}% Confidence
                   </p>
                   <p className="text-sm text-gray-600 italic">
-                    "{bet.reasoning}"
+                    {bet.edge} Edge
                   </p>
                 </div>
               </div>
@@ -98,10 +116,10 @@ const PlayerProjections = (props: { data: any; selectedTeam: Team }) => {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {props.data.wateredBets
-            .sort((a: any, b: any) => b.confidence - a.confidence)
+            .sort((a: any, b: any) => b.hitRate - a.hitRate)
             .map((bet: any, index: number) => (
               <div
-                key={bet.market}
+                key={index + bet.market}
                 className="bg-white p-4 rounded-lg shadow-sm border border-gray-200"
               >
                 <div className="flex justify-between items-start mb-2">
@@ -111,17 +129,17 @@ const PlayerProjections = (props: { data: any; selectedTeam: Team }) => {
                 </div>
                 <div className="space-y-2">
                   <p className="text-xl text-black font-bold">
-                    Alternate Line: {bet.alternate}
+                    Alternate Line: {bet.alternateLine}
                   </p>
                   <p
-                    className={`font-bold text-lg italic ${confidenceColor(
-                      bet.confidence
+                    className={`font-bold text-lg italic ${hitRateColor(
+                      bet.hitRate
                     )}`}
                   >
-                    {bet.confidence}% Confidence
+                    Hit Rate: {bet.hitRate}% {bet.hitRateDetails}
                   </p>
                   <p className="text-sm text-gray-600 italic">
-                    {bet.reasoning}
+                    {bet.projectionComparison}
                   </p>
                 </div>
               </div>
@@ -137,7 +155,7 @@ const PlayerProjections = (props: { data: any; selectedTeam: Team }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {props.data.exploitableLines.map((bet: any, index: number) => (
             <div
-              key={bet.market}
+              key={index + bet.market}
               className="bg-white p-4 rounded-lg shadow-sm border border-gray-200"
             >
               <div className="flex justify-between items-start mb-2">
@@ -153,12 +171,12 @@ const PlayerProjections = (props: { data: any; selectedTeam: Team }) => {
                   Projected: {bet.aiProjection}
                 </p>
                 <p
-                    className={`font-bold text-lg italic ${confidenceColor(
-                      bet.confidence
-                    )}`}
-                  >
-                    {bet.confidence}% Confidence
-                  </p>
+                  className={`font-bold text-lg italic ${confidenceColor(
+                    bet.confidence
+                  )}`}
+                >
+                  {bet.confidence}% Confidence
+                </p>
                 <p className={`font-bold text-lg ${betColor(bet.bet)}`}>
                   <span>
                     {bet.difference} {bet.bet}

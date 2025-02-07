@@ -1,58 +1,26 @@
-import React from "react";
+import { PlayerSubnavLinksEnum } from "@/enums/PlayerSubnavLinksEnum";
+import React, { Dispatch, SetStateAction } from "react";
 
 type PlayerSubNavProps = {
-  activeTab: "stats" | "gamelog" | "analytics" | "ai" | "props"; // Narrow down to "stats" and "gamelog"
-  setActiveTab: (tab: "stats" | "gamelog" | "analytics" | "ai" | "props") => void; // Narrow down as well
+  activeTab: PlayerSubnavLinksEnum;  // ✅ Now correctly using the enum type
+  setActiveTab: Dispatch<SetStateAction<PlayerSubnavLinksEnum>>;
 };
 
-const PlayerSubNav: React.FC<PlayerSubNavProps> = ({
-  activeTab,
-  setActiveTab,
-}) => {
+const PlayerSubNav: React.FC<PlayerSubNavProps> = ({ activeTab, setActiveTab }) => {
   const buttonStyle = "px-4 py-1 rounded-full border min-w-fit";
   const buttonStyleActive = "bg-white text-black font-semibold";
+
   return (
     <div className="flex space-x-4 overflow-hidden overflow-x-auto min-h-fit py-2">
-      <button
-        className={`${buttonStyle} ${
-          activeTab === "stats" ? buttonStyleActive : ""
-        }`}
-        onClick={() => setActiveTab("stats")}
-      >
-        Stats
-      </button>
-      <button
-        className={`${buttonStyle} ${
-          activeTab === "gamelog" ? buttonStyleActive  : ""
-        }`}
-        onClick={() => setActiveTab("gamelog")}
-      >
-        Game Log
-      </button>
-      <button
-        className={`${buttonStyle} ${
-          activeTab === "analytics" ? buttonStyleActive  : ""
-        }`}
-        onClick={() => setActiveTab("analytics")}
-      >
-        Analytics
-      </button>
-      <button
-        className={`${buttonStyle} ${
-          activeTab === "ai" ? buttonStyleActive  : ""
-        }`}
-        onClick={() => setActiveTab("ai")}
-      >
-        Ai Projections
-      </button>
-      <button
-        className={`${buttonStyle} ${
-          activeTab === "props" ? buttonStyleActive  : ""
-        }`}
-        onClick={() => setActiveTab("props")}
-      >
-        Props
-      </button>
+      {Object.values(PlayerSubnavLinksEnum).map((value) => (
+        <button
+          key={value}
+          className={`${buttonStyle} ${activeTab === value ? buttonStyleActive : ""}`}
+          onClick={() => setActiveTab(value as PlayerSubnavLinksEnum)}
+        >
+          {value.charAt(0).toUpperCase() + value.slice(1)}
+        </button>
+      ))}
     </div>
   );
 };

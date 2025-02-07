@@ -1,25 +1,30 @@
 import { useEffect, useState } from "react";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { difference } from "next/dist/build/utils";
+import { alternateLines } from "../../public/data/AlternateLines";
 
 export type Projection = {
-  stat: string;
-  projection: number;
-  matchupImpact: string;
+  market: string;
+  medianProjection: number;
+  confidence: number;
+  calculationSteps: string;
 };
 
 export type WateredBet = {
   market: string;
-  confidence: number;
-  alternate: number;
-  reasoning: string;
+  hitRate: number;
+  hitRateDetails: string;
+  alternateLine: number;
+  projectionComparison: string;
 };
 
 export type RecommendedBet = {
   market: string;
+  sportsbookLine: number;
+  recommendation: string;
   confidence: number;
-  recommendation: number;
-  reasoning: string;
+  edge: string;
+  math: string;
 };
 
 export type ExploitableLines = {
@@ -37,7 +42,7 @@ export function useAiResponse() {
     "AIzaSyA3nMt9_5UiaPVevkUYavZEpuPeIZFAWrc"
   );
   const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-flash-8b-exp-0924",
+    model: "gemini-2.0-flash-lite-preview-02-05",
   });
 
   const [response, setResponse] = useState<{
@@ -74,29 +79,33 @@ export function useAiResponse() {
       try {
         const cleanJson = sanitizeJsonOutput(formattedResponse);
         const parsed = JSON.parse(cleanJson);
-        console.log("Valid JSON Parsed:", parsed);
+        // console.log("Valid JSON Parsed:", parsed);
 
         if(parsed) {
           setResponse({
             projections:
               parsed.projections?.map((p: Projection) => ({
-                stat: p.stat,
-                projection: p.projection,
-                matchupImpact: p.matchupImpact || "",
+                market: p.market,
+                medianProjection: p.medianProjection,
+                confidence: p.confidence,
+                calculationSteps: p.calculationSteps || ""
               })) || [],
             wateredBets:
               parsed.wateredBets?.map((bet: WateredBet) => ({
                 market: bet.market,
-                confidence: bet.confidence,
-                alternate: bet.alternate,
-                reasoning: bet.reasoning,
+                alternateLine: bet.alternateLine,
+                hitRate: bet.hitRate,
+                hitRateDetails: bet.hitRateDetails,
+                projectionComparison: bet.projectionComparison,
               })) || [],
             recommendations:
               parsed.recommendations?.map((rec: RecommendedBet) => ({
                 market: rec.market,
-                confidence: rec.confidence,
+                sportsbookLine: rec.sportsbookLine,
                 recommendation: rec.recommendation,
-                reasoning: rec.reasoning,
+                confidence: rec.confidence,
+                edge: rec.edge,
+                math: rec.math
               })) || [],
             exploitableLines:
               parsed.exploitableLines?.map((exp: ExploitableLines) => ({
