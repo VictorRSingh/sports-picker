@@ -16,6 +16,10 @@ export async function GET(request: NextRequest) {
 
     const $ = cheerio.load(gameLogsHTML);
 
+    // const gameLogs: Gamelog[] = [];
+
+    
+
     const gameLog: Gamelog = {
         headers:
           {

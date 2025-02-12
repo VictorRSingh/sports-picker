@@ -113,6 +113,7 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
       3. Required in output:
          - Confidence must be ≥75%
          - Clear math showing Edge calculation
+      4. Filter out any "NO BET" recommendations
       
       ## 🎯 EXPLOITABLE LINES RULES
       1. For EACH sportsbook line:
@@ -126,36 +127,40 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
             - AI projection comparison
             - Gap percentage
       
-      ## 🚰 WATERED BETS RULES
-      For EACH alternate line in ${JSON.stringify(pAlternateMarkets)}:
-      1. Sort alternate lines DESCENDING (highest to lowest)
-      2. For EACH line in sorted list:
-         a. Calculate EXACT hit rate using LAST 10 GAMES:
-            ${JSON.stringify(gameLogs.rows.slice(0, 9))}
-         b. Validate STRICT conditions:
-            - Line MUST BE < Projection
-            - Minimum 8/10 hits (80%) for "High Confidence"
-            - Minimum 6/10 hits (60%) for "Medium Confidence"
-      3. Selection Priority:
-         a. First: Highest line with ≥80% hit rate
-         b. Second: Next highest line with ≥70% hit rate
-         c. Third: Highest line with ≥60% hit rate
-      4. Anti-Error Measures:
-         - DOUBLE-CHECK actual game log numbers against line
-         - REJECT any line where projection < line
-         - FLAG discrepancies >15% between calculated/claimed hit rates
-
-      ## VALIDATION EXAMPLE: LEBRON JAMES LAST 10
-      Assists Log: ${JSON.stringify([8,8,12,9,8,6,11,13,5,7])}
-      Rebounds Log: ${JSON.stringify([7,11,3,8,7,14,10,5,7,6])}
-
-      Assists Analysis:
-      - 8+ assists: 9/10 games (90%)
-      - 10+ assists: 3/10 games (30%)
-
-      Rebounds Analysis: 
-      - 10+ rebounds: 3/10 games (30%)
-      - 8+ rebounds: 6/10 games (60%)
+      ## 🚰 WATERED BETS RULES  
+          
+      **Task:** Identify the highest confidence alternate lines for each stat from the given game logs, ensuring strict hit rate conditions.  
+          
+      ### **Processing Steps:**  
+      1. **Sort** alternate lines **in descending order**.  
+      2. **For each alternate line in the sorted list:**  
+         - Calculate the **exact hit rate** (number of games meeting or exceeding the line).  
+         - Validate against **strict conditions**:  
+           - Line **must be < projection**.  
+           - **High Confidence**: ≥80% hit rate (**8/10 games**).  
+           - **Medium Confidence**: ≥70% hit rate (**7/10 games**).  
+           - **Low Confidence**: ≥60% hit rate (**6/10 games**).  
+      3. **Use all game logs** for calculations (**Total Games: \${gameLogs.rows.length}**).  
+      4. **Selection Priority:**  
+         - **First:** Highest line with **≥80% hit rate**.  
+         - **Second:** Next highest with **≥70% hit rate**.  
+         - **Third:** Highest line with **≥60% hit rate**.  
+          
+      ### **Anti-Error Measures:**  
+      - **Double-check** actual game log numbers against the line.  
+      - **Reject** any line where **projection < line**.  
+      - **Flag discrepancies** >15% between calculated and claimed hit rates.  
+          
+      **Example Output Format:**  
+          
+      **🚰 Watered/High Confidence Bets**  
+      **Assists**  
+      - **Alternate Line:** 8  
+      - **Hit Rate:** 90% (9/10 games)  
+          
+      **Rebounds**  
+      - **Alternate Line:** 8  
+      - **Hit Rate:** 60% (6/10 games)  
           
       ## 📝 REQUIRED OUTPUT
       \`\`\`json
@@ -208,6 +213,9 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
       - ENFORCE 0.5 increment adjustments for confidence
       - DOUBLE-CHECK matchup data aligns with ${selectedTeam.name} stats
       `;
+      // ## VALIDATION EXAMPLE: LEBRON JAMES LAST 10
+      // Assists Log: ${JSON.stringify([8,8,12,9,8,6,11,13,5,7])}
+      // Rebounds Log: ${JSON.stringify([7,11,3,8,7,14,10,5,7,6])}
       if (prompt) {
         setAIPrompt(prompt);
       }
