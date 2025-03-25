@@ -34,7 +34,6 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
   } | null>(null);
 
   const [AIPrompt, setAIPrompt] = useState<string>();
-  const exploitableLinePercent = 8;
   const { response, fetchAiResponse } = useAiResponse();
 
   const pathname = usePathname();

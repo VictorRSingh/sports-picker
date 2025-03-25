@@ -51,14 +51,14 @@ export async function GET(request: NextRequest) {
     const playerTeam = playerDetails.split(" - ")[2];
 
 
-    console.log(playerPosition.split(" ").map((word) => word[0]).join(""));
+    console.log(playerPosition?.split(" ").map((word) => word[0]).join(""));
 
     player.details = {
       number: Number(playerNumber),
       position:
         PlayerPositionEnum[
           playerPosition
-            .split(" ")
+            ?.split(" ")
             .map((word) => word[0])
             .join("") as keyof typeof PlayerPositionEnum
         ],
