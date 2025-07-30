@@ -2,10 +2,6 @@ import { ILink } from "@/interfaces/ILink";
 
 export const Links: ILink[] = [
   {
-    name: "Home",
-    path: "/",
-  },
-  {
     name: "NBA",
     path: "/nba"
   },
@@ -13,8 +9,16 @@ export const Links: ILink[] = [
     name: "NFL",
     path: "/nfl",
   },
+    {
+    name: "MLB",
+    path: "/mlb",
+  },
   {
     name: "NHL",
     path: "/nhl",
   },
+    {
+    name: "WNBA",
+    path: "/wnba",
+  }
 ];

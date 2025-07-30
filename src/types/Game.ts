@@ -1,19 +1,24 @@
 export type Game = {
-  gameUrl: string;
-  home: {
-    team: string;
-    short: string;
-    spread: string;
-    moneyline: string;
-    total: string;
-    teamUrl?: string;
+  id: string;
+  date: string;
+  status: string;
+  teams: {
+    homeTeam: {
+      name: string;
+      logo: string;
+    };
+    awayTeam: {
+      name: string;
+      logo: string;
+    };
   };
-  away: {
-    team: string;
-    short: string;
-    spread: string;
-    moneyline: string;
-    total: string;
-    teamUrl?: string;
+  location: {
+    city: string;
+    stadium: string;
   };
+  odds: {
+    team: string;
+    moneyline: number;
+  },
+  webUrl: string;
 };

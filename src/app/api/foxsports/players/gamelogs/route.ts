@@ -6,19 +6,15 @@ export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const playerUrl = searchParams.get("playerUrl");
 
-  const url = `https://www.foxsports.com${playerUrl}-game-log?season=2024`;
-
-  console.log(url);
+  const currentYear = new Date().getFullYear();
+  const url = `https://www.foxsports.com${playerUrl}-game-log?seasonType=reg&season=${currentYear}`;
+  console.log("GameLog URL", url);
 
   try {
     const response = await axios.get(url);
     const gameLogsHTML = await response.data;
 
     const $ = cheerio.load(gameLogsHTML);
-
-    // const gameLogs: Gamelog[] = [];
-
-    
 
     const gameLog: Gamelog = {
         headers:
@@ -57,7 +53,6 @@ export async function GET(request: NextRequest) {
           }))
           .get(),
       };
-
     return NextResponse.json(gameLog);
   } catch (error) {
     console.error("Failed to fetch Gamelogs");

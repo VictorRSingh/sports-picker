@@ -223,7 +223,6 @@ const AiPrompts = ({ gameLogs, player, playerProps }: AiPromptsProps) => {
 
   useEffect(() => {
     if (AIPrompt) {
-      console.log(AIPrompt)
       fetchAiResponse(AIPrompt);
     }
   }, [AIPrompt]);

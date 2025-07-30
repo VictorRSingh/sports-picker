@@ -12,6 +12,7 @@ export function useGameLog(player: Player) {
                 return;
             }
 
+            console.log(player.webUrl)
             const response = await axios.get(`/api/foxsports/players/gamelogs?playerUrl=${player.webUrl}`);
             const data = await response.data;
 

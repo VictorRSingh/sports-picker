@@ -2,7 +2,7 @@ import React from 'react'
 
 const TeamPage = () => {
   return (
-    <div>TeamPage</div>
+    <div className='flex items-center justify-center h-full w-full'>Team Page Under Construction</div>
   )
 }
 

@@ -56,8 +56,6 @@ const PlayerPage = () => {
     }
   };
 
-  console.log(player);
-
   return (
     <>
       {player && (

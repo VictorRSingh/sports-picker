@@ -132,3 +132,5 @@ dist
 src/config.ts
 
 next.config.ts
+
+.env

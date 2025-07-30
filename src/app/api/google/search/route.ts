@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   const url =
     sport &&
     player &&
-    `https://www.googleapis.com/customsearch/v1?key=AIzaSyAsGnxj0zbRhlDujku34zv4iGScr0ABSDs&cx=8181e3174b67b4530&q=covers+${sport}+${player}&num=1`;
+    `https://www.googleapis.com/customsearch/v1?key=AIzaSyAsGnxj0zbRhlDujku34zv4iGScr0ABSDs&cx=8181e3174b67b4530&q=covers.com+${sport}+${player}&num=1`;
 
     console.log(url);
   try {
