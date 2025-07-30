@@ -8,12 +8,12 @@ const GamePage = () => {
 
   // These are typed as string | string[] | undefined — so cast if needed
   const sport = params.sport as string;
-  const gameUrl = params.game as string;
+  const webUrl = params.game as string;
 
   return (
     <div className="w-full lg:px-20"> 
       <div className="flex flex-col items-center justify-center h-full w-full">
-        <h1 className="text-2xl font-bold">Game Page: {gameUrl}</h1>
+        <h1 className="text-2xl font-bold">Game Page: {webUrl}</h1>
         <p className="text-lg">Sport: {sport}</p>
       </div>
     </div>

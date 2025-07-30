@@ -10,9 +10,9 @@ interface GamePreviewProps {
 const GamePreview = ({ game }: GamePreviewProps) => {
   return (
     <div className='bg-neutral-800 rounded p-4 mb-4'>
-        <MatchupHeader />
+        {/* <MatchupHeader />
         <MatchupRow key={game?.teams?.awayTeam.name} team={game.teams?.awayTeam.name} />
-        <MatchupRow key={game?.teams?.homeTeam.name} team={game.teams?.homeTeam.name} />
+        <MatchupRow key={game?.teams?.homeTeam.name} team={game.teams?.homeTeam.name} /> */}
     </div>
   )
 }

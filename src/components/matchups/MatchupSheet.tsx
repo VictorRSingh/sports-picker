@@ -16,7 +16,7 @@ const MatchupSheet = ({ matchups }: MatchupSheetProps) => {
       <h1 className="uppercase font-bold text-2xl lg:text-4xl">
         Upcoming Matchups
       </h1>
-      <MatchupTable matchups={matchups} />
+      {/* <MatchupTable matchups={matchups} /> */}
     </div>
   );
 };

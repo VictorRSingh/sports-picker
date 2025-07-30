@@ -19,11 +19,11 @@ export async function GET(request: NextRequest) {
     .find("a")
     .map(async (_, game) => { // ✅ Use `.map()` to return promises
       const rows: string[][] = [];
-      const gameUrl = $(game).attr("href");
+      const webUrl = $(game).attr("href");
   
-      if (!gameUrl) return null; // Skip if gameUrl is undefined
+      if (!webUrl) return null; // Skip if webUrl is undefined
   
-      const teamUrls = await fetchTeamUrls(gameUrl); // ✅ Await the Promise properly
+      const teamUrls = await fetchTeamUrls(webUrl); // ✅ Await the Promise properly
   
       $(game)
         .find(".odds-sp-content div")
@@ -40,32 +40,32 @@ export async function GET(request: NextRequest) {
   
       const gamesArray: Game[] = [];
   
-      for (let i = 0; i < rows.length; i += 2) {
-        const awayRow = rows[i];
-        const homeRow = rows[i + 1];
+      // for (let i = 0; i < rows.length; i += 2) {
+      //   const awayRow = rows[i];
+      //   const homeRow = rows[i + 1];
   
-        if (homeRow && awayRow) {
-          gamesArray.push({
-            gameUrl: gameUrl,
-            away: {
-              team: awayRow[0].split("\n          \n            ")[0],
-              short: awayRow[0].split("\n          \n            ")[1],
-              spread: awayRow[4],
-              moneyline: awayRow[5],
-              total: awayRow[6],
-              teamUrl: teamUrls[0], // ✅ No Promise issues
-            },
-            home: {
-              team: homeRow[0].split("\n          \n            ")[0],
-              short: homeRow[0].split("\n          \n            ")[1],
-              spread: homeRow[4],
-              moneyline: homeRow[5],
-              total: homeRow[6],
-              teamUrl: teamUrls[1], // ✅ No Promise issues
-            },
-          });
-        }
-      }
+      //   if (homeRow && awayRow) {
+      //     gamesArray.push({
+      //       webUrl: webUrl,
+      //       away: {
+      //         team: awayRow[0].split("\n          \n            ")[0],
+      //         short: awayRow[0].split("\n          \n            ")[1],
+      //         spread: awayRow[4],
+      //         moneyline: awayRow[5],
+      //         total: awayRow[6],
+      //         teamUrl: teamUrls[0], // ✅ No Promise issues
+      //       },
+      //       home: {
+      //         team: homeRow[0].split("\n          \n            ")[0],
+      //         short: homeRow[0].split("\n          \n            ")[1],
+      //         spread: homeRow[4],
+      //         moneyline: homeRow[5],
+      //         total: homeRow[6],
+      //         teamUrl: teamUrls[1], // ✅ No Promise issues
+      //       },
+      //     });
+      //   }
+      // }
   
       return gamesArray;
     })
@@ -82,8 +82,8 @@ export async function GET(request: NextRequest) {
   }
 }
 
-const fetchTeamUrls = async (gameUrl: string) => {
-  const response = await axios.get(`https://foxsports.com${gameUrl}`);
+const fetchTeamUrls = async (webUrl: string) => {
+  const response = await axios.get(`https://foxsports.com${webUrl}`);
   const teamsHTML = await response.data;
 
   const $ = cheerio.load(teamsHTML);

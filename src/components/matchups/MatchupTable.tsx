@@ -19,17 +19,7 @@ const MatchupTable = ({matchups}: MatchupTableProps) => {
         <>
           <MatchupHeader />
           {matchups.map((matchup, index) => (
-            <div
-              key={index}
-              className="grid grid-cols-1 w-full my-4 border p-2 rounded cursor-pointer"
-              onClick={(() => router.push(`/g/${matchup.gameUrl}&away=${matchup.away.teamUrl}&home=${matchup.home.teamUrl}&sport=${pathname.split("/")[1]}`))}
-            >
-              {/* Away Team */}
-              <MatchupRow key={matchup.away.short} team={matchup.away} />
-
-              {/* Home Team */}
-              <MatchupRow key={matchup.home.short} team={matchup.home} />
-            </div>
+            <></>
           ))}
         </>
       )}
