@@ -1,6 +1,8 @@
-import { Stat } from "./Stat";
-
 export type TeamStats = {
+  category: string;
+  sport: string;
+  team: string;
+  standings: string;
   headers: {
     columns: Array<{
       index: number;

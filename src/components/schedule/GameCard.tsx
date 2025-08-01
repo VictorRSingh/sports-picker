@@ -17,7 +17,7 @@ const GameCard = ({ game }: GameCardProps) => {
     >
       <div className="flex justify-between items-center">
         <div className="text-sm text-gray-500 text-end">{game.date}</div>
-        <div className="text-sm text-gray-500 text-end">{game.status}</div>
+        <div className={`text-sm text-end ${game.status === "LIVE" ? "text-red-500" : game.status.includes("p.m.") || game.status.includes("a.m.") ? "" : "text-green-500"}`}>{game.status}</div>
       </div>
       <div className="flex items-center justify-between gap-x-4">
         <div className="flex flex-col space-y-2">

@@ -48,34 +48,35 @@ const StandingsCard = ({ sport }: StandingsCardProps) => {
                         </tr>
                       </thead>
                       <tbody>
-                        {division.rows.map((row: any, index: number) => (
-                          <tr key={index} className="">
-                            <td className="px-4 py-2 border-b">{row.rank}</td>
-                            <td className="px-4 py-2 border-b">
-                              <a
-                                href={row.teamUrl}
-                                className="flex items-center space-x-2"
-                              >
-                                <img
-                                  src={row.logo}
-                                  alt={`${row.team} logo`}
-                                  className="w-6 h-6"
-                                />
-                                <span>{row.team}</span>
-                              </a>
-                            </td>
-                            {division.headers.map(
-                              (header: any, headerIndex: number) => (
-                                <td
-                                  key={headerIndex}
-                                  className="px-4 py-2 border-b"
+                        {division.rows.map((row: any, index: number) => {
+                          return (
+                            <tr key={index} className="">
+                              <td className="px-4 py-2 border-b">{row.rank}</td>
+                              <td className="px-4 py-2 border-b hover:scale-150 transition-transform duration-200">
+                                <a
+                                  href={row.teamUrl}
+                                  className="flex items-center space-x-2"
                                 >
-                                  {row[header]}
-                                </td>
-                              )
-                            )}
-                          </tr>
-                        ))}
+                                  <img
+                                    src={row.logo}
+                                    alt={`${row.team} logo`}
+                                    className="w-6 h-6" />
+                                  <span>{row.team}</span>
+                                </a>
+                              </td>
+                              {division.headers.map(
+                                (header: any, headerIndex: number) => (
+                                  <td
+                                    key={headerIndex}
+                                    className="px-4 py-2 border-b"
+                                  >
+                                    {row[header]}
+                                  </td>
+                                )
+                              )}
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>

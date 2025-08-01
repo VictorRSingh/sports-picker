@@ -1,18 +1,18 @@
-"use client";
+// /app/[sport]/[slug]/page.tsx
 import SportDynamicClientPage from "@/components/sport/SportDynamicClientPage";
 import React from "react";
 
-export default function SportDynamicPage({
+export default async function SportDynamicPage({
   params,
 }: {
   params: Promise<{ sport: string; slug: string }>;
 }) {
-  const { sport, slug } = React.use(params);
+  const { sport, slug } = await params;
   const sportLower = sport.toLowerCase();
-  const supportedSports = ["nba", "nfl", "nhl", "mlb", "wnba"];
 
+  const supportedSports = ["nba", "nfl", "nhl", "mlb", "wnba"];
   if (!supportedSports.includes(sportLower)) {
-    return <div>Sport not supported</div>;
+    return <div>Unsupported sport</div>;
   }
 
   return (

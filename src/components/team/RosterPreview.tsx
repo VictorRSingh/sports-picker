@@ -9,8 +9,9 @@ interface RosterPreviewProps {
 const RosterPreview = ({ roster }: RosterPreviewProps) => {
   const router = useRouter();
   return (
-    <div className="bg-neutral-800 rounded p-4 w-full">
-      <div className="grid grid-cols-2 gap-4 max-h-60 lg:max-h-96 overflow-y-auto">
+    <div className="lg:w-3/4 mx-auto rounded w-full space-y-4 p-4">
+      <h2 className="text-2xl font-bold">Roster</h2>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 max-h-80 lg:max-h-full overflow-y-auto">
         {roster.players.map((player, index) => (
           <div
             key={`${player.name}`}

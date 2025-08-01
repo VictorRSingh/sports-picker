@@ -1,3 +1,4 @@
+// components/sport/SportDynamicClientPage.tsx
 "use client";
 
 import { useEffect } from "react";
@@ -8,20 +9,18 @@ type Props = {
   slug: string;
 };
 
-const SportDynamicClientPage: React.FC<Props> = async ({ sport, slug }) => {
+export default function SportDynamicClientPage({ sport, slug }: Props) {
   const router = useRouter();
 
   useEffect(() => {
     if (slug.endsWith("-team")) {
-      router.push(`/${sport}/t/${slug}`);
+      router.push(`/t/${sport}/${slug}`);
     } else if (slug.endsWith("-player")) {
-      router.push(`/${sport}/p/${slug}`);
+      router.push(`/p/${sport}/${slug}`);
     } else if (slug.includes("-boxscore")) {
       router.push(`/g/${sport}/${slug}`);
     }
   }, [sport, slug, router]);
 
-  return <div>SportDynamicPage: {slug}</div>;
-};
-
-export default SportDynamicClientPage;
+  return <div>Redirecting: {slug}</div>;
+}

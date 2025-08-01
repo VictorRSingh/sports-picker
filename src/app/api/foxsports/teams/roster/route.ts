@@ -10,8 +10,6 @@ export async function GET(request: NextRequest) {
   const teamUrl = searchParams.get("teamUrl");
 
   const url = `https://foxsports.com${teamUrl}-roster`;
-
-  console.log(url);
   try {
     const response = await axios.get(url);
     const rosterHTML = await response.data;

@@ -7,10 +7,10 @@ export async function GET(request: NextRequest) {
   //Get Sport from query
   const { searchParams } = request.nextUrl;
   const sport = searchParams.get("sport");
+  const teamUrl = searchParams.get("teamUrl");
 
   //Create URL to query from
-  const url = `https://foxsports.com/${sport}/teams`;
-    console.log(url);
+  const url = `https://foxsports.com/${sport}/${teamUrl}-stats`;
   try {
     //Fetch the HTML
     const response = await axios.get(url);
