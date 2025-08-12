@@ -12,7 +12,6 @@ export function useRoster(teamUrl: string | null) {
 
     const fetchRoster = async () => {
       try {
-        console.log(`Fetching roster for ${teamUrl}...`); // Debug log
         const response = await axios.get(`/api/foxsports/teams/roster?teamUrl=${teamUrl}`);
         setRoster(response.data);
       } catch (error) {

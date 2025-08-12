@@ -8,28 +8,33 @@ interface RosterPreviewProps {
 
 const RosterPreview = ({ roster }: RosterPreviewProps) => {
   const router = useRouter();
-  return (
-    <div className="lg:w-3/4 mx-auto rounded w-full space-y-4 p-4">
-      <h2 className="text-2xl font-bold">Roster</h2>
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 max-h-80 lg:max-h-full overflow-y-auto">
-        {roster.players.map((player, index) => (
+  if (roster) return (
+    <div className="mx-auto w-full space-y-6 p-6 max-h-full overflow-y-auto">
+      <h2 className="text-3xl font-extrabold mb-4 flex items-center gap-2">
+        <span className="inline-block w-2 h-8 bg-blue-600 rounded-full"></span>
+        Roster ({roster.playerCount})
+      </h2>
+      <div className="grid grid-cols-1 gap-6 max-h-96 lg:max-h-full overflow-y-auto">
+        {roster.players.map((player) => (
           <div
-            key={`${player.name}`}
-            className="col-span-full lg:col-span-1 rounded border p-2 flex justify-between items-center max-h-32 cursor-pointer"
+            key={player.name}
+            className="rounded-xl border border-gray-200 p-4 flex flex-col items-center shadow hover:shadow-xl transition-shadow cursor-pointer group"
             onClick={() => router.push(`/p/${player.webUrl}`)}
           >
-            <img src={player.image} width={50} />
-            <div className="flex-col w-full p-2">
-              <div className="flex gap-x-2 items-center">
-                <h1 className="text-lg font-bold">{player.name}</h1>
-                <p className="text-sm text-gray-400">
-                  #{player.details?.number}
-                </p>
-              </div>
-              <h2 className="text-sm uppercase text-gray-500 font-semibold">
-                {player.details?.position}
-              </h2>
+            <div className="relative w-20 h-20 mb-3">
+              <img
+                src={player.image}
+                alt={player.name}
+                className="w-20 h-20 rounded-full object-cover border-4 border-blue-200 group-hover:scale-105 transition-transform"
+              />
+              <span className="absolute -bottom-2 -right-2 bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full shadow">
+                #{player.details?.number}
+              </span>
             </div>
+            <h1 className="text-lg font-semibold text-center">{player.name}</h1>
+            <h2 className="text-xs uppercase text-blue-600 font-bold tracking-wide text-center mt-1">
+              {player.details?.position}
+            </h2>
           </div>
         ))}
       </div>

@@ -42,7 +42,6 @@ export async function GET(request: NextRequest) {
       const homeTeam = homeTeamCell.find("img").attr("alt") || "";
       const homeAbbr = homeTeamCell.find(".table-entity-name").text().trim();
       const webUrl = awayTeamCell.find("a").attr("href") || "";
-      console.log("Web URL:", webUrl);
       let rawStatus = statusCell.find(".table-result").text().trim();
       let [hoursStr, minutesPart] = rawStatus.split(":");
       let hours = parseInt(hoursStr);
@@ -74,10 +73,12 @@ export async function GET(request: NextRequest) {
           awayTeam: {
             name: awayTeam,
             logo: awayTeamCell.find("img").attr("src") || "",
+            webUrl: ""
           },
           homeTeam: {
             name: homeTeam,
             logo: homeTeamCell.find("img").attr("src") || "",
+            webUrl: ""
           },
         },
         location: {

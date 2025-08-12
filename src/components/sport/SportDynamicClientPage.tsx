@@ -22,5 +22,5 @@ export default function SportDynamicClientPage({ sport, slug }: Props) {
     }
   }, [sport, slug, router]);
 
-  return <div>Redirecting: {slug}</div>;
+  return <div>Redirecting...</div>;
 }

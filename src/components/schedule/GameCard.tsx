@@ -1,19 +1,27 @@
 import { Game } from "@/types/Game";
 import React from "react";
 import { useRouter } from "next/navigation";
+import { fetchTeams } from "@/utils/game/fetchTeams";
+import { useRoster } from "@/hooks/useRoster";
+import RosterPreview from "../team/RosterPreview";
+import GamePreview from "../game/GamePreview";
 
 type GameCardProps = {
   // Define the props for GameCard if needed
   game: Game;
+  sport: string;
 };
 
-const GameCard = ({ game }: GameCardProps) => {
+const GameCard = ({ game, sport }: GameCardProps) => {
   const router = useRouter();
+
+  const teams = fetchTeams(game?.webUrl)
+  game.teams.awayTeam.webUrl = teams.awayTeam
+  game.teams.homeTeam.webUrl = teams.homeTeam
 
   return (
     <div
       className="space-y-2 cursor-pointer"
-      onClick={() => router.push(`${game.webUrl}`)}
     >
       <div className="flex justify-between items-center">
         <div className="text-sm text-gray-500 text-end">{game.date}</div>
@@ -42,6 +50,10 @@ const GameCard = ({ game }: GameCardProps) => {
       <div className="flex justify-between items-center">
         <div className="text-sm text-gray-500">{game.location.city}</div>
         <div className="text-sm text-gray-500 text-end">{game.location.stadium}</div>
+      </div>
+
+      <div className="">
+        <GamePreview game={game} sport={sport} />
       </div>
     </div>
   );

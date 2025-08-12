@@ -59,7 +59,7 @@ const StandingsCard = ({ sport }: StandingsCardProps) => {
                                 >
                                   <img
                                     src={row.logo}
-                                    alt={`${row.team} logo`}
+                                    alt={`${row.team}`}
                                     className="w-6 h-6" />
                                   <span>{row.team}</span>
                                 </a>

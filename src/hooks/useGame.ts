@@ -10,7 +10,7 @@ export function useGame(sport: string, webUrl: string) {
       `/api/foxsports/game?sport=${sport}&webUrl=${webUrl}`
     );
     const data = response.data;
-
+    
     if (data) {
       setGame(data);
     }

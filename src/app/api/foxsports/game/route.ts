@@ -1,14 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
-import axios from 'axios';
-import * as cheerio from 'cheerio';
-import { Game } from '@/types/Game';
+import { NextRequest, NextResponse } from "next/server";
+import axios from "axios";
+import * as cheerio from "cheerio";
+import { Game } from "@/types/Game";
+import { Stat } from "@/types/Stat";
 
 export async function GET(request: NextRequest) {
-    const {searchParams} = request.nextUrl;
-    const sport = searchParams.get("sport");
-    const webUrl = searchParams.get("webUrl");
+  const { searchParams } = request.nextUrl;
+  const sport = searchParams.get("sport");
+  const webUrl = searchParams.get("webUrl");
 
-    const url = `https://foxsports.com/${sport}/${webUrl}?tab=odds`;
+  const url = `https://foxsports.com${webUrl}`;
 
   try {
     const response = await axios.get(url);
@@ -16,39 +17,216 @@ export async function GET(request: NextRequest) {
 
     const $ = cheerio.load(gameHTML);
 
-    const gameContainer = $(".odds-sp-content");
+    const featuredPairingsContainer = $(".featured-pairing-container");
+    const awayFeaturedPlayerStats: any[] = [];
+    const homeFeaturedPlayerStats: any[] = [];
 
-    const teams = gameContainer.find(".sp-rows"); // Get both teams
-    
-    if (teams.length < 2) {
-      console.error("Could not find both teams");
-      return;
-    }
-    
-    // const awayTeam = $(teams[0]); // First team = Away
-    // const homeTeam = $(teams[1]); // Second team = Home
-    
-    // const game: Game = {
-    //   webUrl: webUrl as string,
-    //   teams.away: {
-    //     team: awayTeam.find(".full-text").text().trim(),
-    //     short: awayTeam.find(".abbr-text").text().trim(),
-    //     spread: awayTeam.find(".sp-row-data").eq(0).text().trim(), // First column
-    //     moneyline: awayTeam.find(".sp-row-data").eq(1).text().trim(), // Second column
-    //     total: awayTeam.find(".sp-row-data").eq(2).text().trim() // Third column
-    //   },
-    //   home: {
-    //     team: homeTeam.find(".full-text").text().trim(),
-    //     short: homeTeam.find(".abbr-text").text().trim(),
-    //     spread: homeTeam.find(".sp-row-data").eq(0).text().trim(),
-    //     moneyline: homeTeam.find(".sp-row-data").eq(1).text().trim(),
-    //     total: homeTeam.find(".sp-row-data").eq(2).text().trim()
-    //   }
-    // };
-    
-    return NextResponse.json({});
+    featuredPairingsContainer
+      .find(".players-data")
+      .find(".left-entity")
+      .find(".player-info .featured-stats span")
+      .each((_, el) => {
+        const row = $(el);
+
+        awayFeaturedPlayerStats.push(row.text().trim());
+      });
+
+    featuredPairingsContainer
+      .find(".players-data")
+      .find(".right-entity")
+      .find(".player-info .featured-stats span")
+      .each((_, el) => {
+        const row = $(el);
+
+        homeFeaturedPlayerStats.push(row.text().trim());
+      });
+
+    const teamStatsComparisonContainer = $("[data-qa=teamStatsComparison]");
+    const awayTeamStats: Stat[] = [];
+    const homeTeamStats: Stat[] = [];
+
+    $('[data-qa="teamStatsComparison"] .team-comparison-row').each((_, el) => {
+      const row = $(el);
+
+      // Away team's number (left column)
+      const leftValue = row.find(".matchup-comparison-data.left").text().trim();
+
+      // Home team's number (right column)
+      const rightValue = row
+        .find(".matchup-comparison-data.right")
+        .text()
+        .trim();
+
+      // Stat abbreviation (middle column)
+      const abbr = row.find(".matchup-comparison-text").text().trim();
+
+      awayTeamStats.push({
+        name: abbr,
+        value: leftValue,
+        abbr: abbr,
+      });
+
+      homeTeamStats.push({
+        name: abbr,
+        value: rightValue,
+        abbr: abbr,
+      });
+    });
+
+    const teamLeadersComparisonContainer = $("[data-qa=teamLeadersComparison]");
+    const awayTeamLeadersStats: Stat[] = [];
+    const homeTeamLeadersStats: Stat[] = [];
+
+    teamLeadersComparisonContainer.find('.team-comparison-row').each((_, el) => {
+      const row = $(el);
+
+      // Away team's number (left column)
+      // const leftValue = row.find(".matchup-comparison-data.left").text().trim();
+      const leftName = row.find('.matchup-comparison-data.left .leader-stats a').text().trim();
+      const leftValue = row.find('.matchup-comparison-data.left .leader-stats div').text().trim();
+
+      // Home team's number (right column)
+      // const rightValue = row
+      //   .find(".matchup-comparison-data.right")
+      //   .text()
+      //   .trim();
+
+      const rightName = row.find('.matchup-comparison-data.right .leader-stats a').text().trim();
+      const rightValue = row.find('.matchup-comparison-data.right .leader-stats div').text().trim();
+
+      // Stat abbreviation (middle column)
+      const abbr = row.find(".matchup-comparison-text").text().trim();
+
+      awayTeamLeadersStats.push({
+        name: leftName,
+        value: leftValue,
+        abbr: abbr,
+      });
+
+      homeTeamLeadersStats.push({
+        name: rightName,
+        value: rightValue,
+        abbr: abbr,
+      });
+    });
+
+    const game: Game = {
+      featuredPairing: {
+        title: featuredPairingsContainer.find("h3").text().trim(),
+        awayPlayer: {
+          image: featuredPairingsContainer
+            .find(".left-entity")
+            .find(".player-headshot")
+            .find("a img")
+            .attr("src"),
+          name: featuredPairingsContainer
+            .find(".left-entity")
+            .find(".player-info")
+            .find(".player-name")
+            .text()
+            .trim(),
+          webUrl: featuredPairingsContainer
+            .find(".left-entity")
+            .find(".player-info")
+            .find("a")
+            .attr("href"),
+          stats: awayFeaturedPlayerStats,
+        },
+        homePlayer: {
+          image: featuredPairingsContainer
+            .find(".right-entity")
+            .find(".player-headshot")
+            .find("a img")
+            .attr("src"),
+          name: featuredPairingsContainer
+            .find(".right-entity")
+            .find(".player-info")
+            .find(".player-name")
+            .text()
+            .trim(),
+          webUrl: featuredPairingsContainer
+            .find(".right-entity")
+            .find(".player-info")
+            .find("a")
+            .attr("href"),
+          stats: homeFeaturedPlayerStats,
+        },
+      },
+      teamStatsComparison: {
+        title: teamStatsComparisonContainer.find("h3").text().trim(),
+        awayTeam: {
+          name: teamStatsComparisonContainer
+            .find(".matchup-team-comparison")
+            .find(".start")
+            .find("span")
+            .eq(0)
+            .text()
+            .trim(),
+          image: teamStatsComparisonContainer
+            .find(".matchup-team-comparison")
+            .find(".start")
+            .find("span img")
+            .attr("src"),
+          sport: sport!,
+          stats: awayTeamStats,
+        },
+        homeTeam: {
+          name: teamStatsComparisonContainer
+            .find(".matchup-team-comparison")
+            .find(".end")
+            .find("span")
+            .eq(0)
+            .text()
+            .trim(),
+          image: teamStatsComparisonContainer
+            .find(".matchup-team-comparison")
+            .find(".end")
+            .find("span img")
+            .attr("src"),
+          sport: sport!,
+          stats: homeTeamStats,
+        },
+      },
+      teamLeadersComparison: {
+        title: teamLeadersComparisonContainer.find("h3").text().trim(),
+        awayTeam: {
+          name: teamLeadersComparisonContainer
+            .find(".matchup-team-comparison")
+            .find(".start")
+            .find("span")
+            .eq(0)
+            .text()
+            .trim(),
+          image: teamLeadersComparisonContainer
+            .find(".matchup-team-comparison")
+            .find(".start")
+            .find("span img")
+            .attr("src"),
+          sport: sport!,
+          stats: awayTeamLeadersStats,
+        },
+        homeTeam: {
+          name: teamLeadersComparisonContainer
+            .find(".matchup-team-comparison")
+            .find(".end")
+            .find("span")
+            .eq(0)
+            .text()
+            .trim(),
+          image: teamLeadersComparisonContainer
+            .find(".matchup-team-comparison")
+            .find(".end")
+            .find("span img")
+            .attr("src"),
+          sport: sport!,
+          stats: homeTeamLeadersStats,
+        },
+      },
+    };
+
+    return NextResponse.json({ ...game });
   } catch (error) {
-    console.error('Error:', error);
-    return NextResponse.json({ success: false});
+    console.error("Error:", error);
+    return NextResponse.json({ success: false });
   }
 }

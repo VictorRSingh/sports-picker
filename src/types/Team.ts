@@ -2,8 +2,8 @@ import { Stat } from "./Stat";
 
 export type Team = {
     name: string;
-    webUrl: string;
+    webUrl?: string;
     sport: string;
-    image: string;
-    stats?: Stat[];
+    image?: string;
+    stats?: Stat[] | any[];
 }

@@ -1,7 +1,6 @@
-import { PlayerPositionEnum } from "@/enums/PlayerPositionEnum";
 
 export type PlayerDetails = {
     number?: number;
-    position?: PlayerPositionEnum;
+    position?: string;
     team?: string;
 }
