@@ -13,9 +13,9 @@ const Hero = ({ heading, description, buttons }: HeroProps) => {
   const router = useRouter();
   return (
     <div className="flex items-center justify-center h-full">
-      <div className="flex flex-col gap-y-4">
-        <h1 className="text-3xl">{heading}</h1>
-        <p className="text-xl">{description}</p>
+      <div className="flex flex-col gap-y-6">
+        <h1 className="text-3xl lg:text-5xl">{heading}</h1>
+        <p className="text-xl lg:text-2xl">{description}</p>
         <div className="flex gap-x-2">
           {buttons?.map((button, index) => (
             <button
@@ -27,7 +27,6 @@ const Hero = ({ heading, description, buttons }: HeroProps) => {
             </button>
           ))}
         </div>
-        <SearchBar />
       </div>
     </div>
   );

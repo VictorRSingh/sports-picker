@@ -11,12 +11,13 @@ interface GamePreviewProps {
 
 const GamePreview = ({ game, sport }: GamePreviewProps) => {
   const gameInfo = useGame(sport, game.webUrl);
-  console.log("GameInfo:", gameInfo);
 
   const Game = gameInfo.game;
 
   return (
-    <div className="my-8 space-y-6 rounded-lg shadow-md max-w-md mx-auto">
+    <>
+    {Game ? (
+      <div className="my-8 space-y-6 rounded-lg shadow-md justify-between w-full items-start">
       {/* Featured Pairing */}
       <div className="space-y-4">
         <div className="text-3xl mb-4">{Game?.featuredPairing?.title}</div>
@@ -175,6 +176,10 @@ const GamePreview = ({ game, sport }: GamePreviewProps) => {
         </div>
       </div>
     </div>
+    ) : (
+      <div>Loading game preview...</div>
+    )}
+    </>
   );
 };
 

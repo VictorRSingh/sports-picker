@@ -2,8 +2,6 @@ import { Game } from "@/types/Game";
 import React from "react";
 import { useRouter } from "next/navigation";
 import { fetchTeams } from "@/utils/game/fetchTeams";
-import { useRoster } from "@/hooks/useRoster";
-import RosterPreview from "../team/RosterPreview";
 import GamePreview from "../game/GamePreview";
 
 type GameCardProps = {
@@ -21,14 +19,14 @@ const GameCard = ({ game, sport }: GameCardProps) => {
 
   return (
     <div
-      className="space-y-2 cursor-pointer"
+      className="cursor-pointer border p-4 rounded"
     >
       <div className="flex justify-between items-center">
         <div className="text-sm text-gray-500 text-end">{game.date}</div>
         <div className={`text-sm text-end ${game.status === "LIVE" ? "text-red-500" : game.status.includes("p.m.") || game.status.includes("a.m.") ? "" : "text-green-500"}`}>{game.status}</div>
       </div>
       <div className="flex items-center justify-between gap-x-4">
-        <div className="flex flex-col space-y-2">
+        <div className="flex flex-col">
           <div className="flex">
             <img
               src={game.teams.awayTeam.logo}
@@ -50,10 +48,6 @@ const GameCard = ({ game, sport }: GameCardProps) => {
       <div className="flex justify-between items-center">
         <div className="text-sm text-gray-500">{game.location.city}</div>
         <div className="text-sm text-gray-500 text-end">{game.location.stadium}</div>
-      </div>
-
-      <div className="">
-        <GamePreview game={game} sport={sport} />
       </div>
     </div>
   );

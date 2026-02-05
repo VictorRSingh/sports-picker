@@ -1,17 +1,23 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import GameCard from "@/components/schedule/GameCard";
 import { useSchedule } from "@/hooks/useSchedule";
-import { Schedule } from "@/types/Schedule";
 import { Game } from "@/types/Game";
-import RosterPreview from "../team/RosterPreview";
+import GamePreview from "../game/GamePreview";
+import { Schedule } from "@/types/Schedule";
 
 type ScheduleCardProps = {
   sport: string;
 };
 const ScheduleCard = ({ sport }: ScheduleCardProps) => {
-  const schedule = useSchedule(sport);
-  const [selectedGame, setSelectedGame] = useState();
+  const schedule: Schedule | null = useSchedule(sport);
+  const [selectedGame, setSelectedGame] = useState<Game | null>(null);
+
+  useEffect(() => {
+    if (Array.isArray(schedule) && schedule.length > 0) {
+      setSelectedGame(schedule[0]);
+    }
+  }, [schedule]);
 
   if (schedule?.success === false) {
     return (
@@ -19,28 +25,42 @@ const ScheduleCard = ({ sport }: ScheduleCardProps) => {
         No Schedule Available
       </div>
     );
-  }
+  } 
 
   return (
-    <div className="flex w-full p-4">
+    <div className="md:flex w-full flex-col">
       {Array.isArray(schedule) ? (
-        <div className="w-full h-full">
+        <div className="h-full">
           <h1 className="text-2xl font-bold">
             Schedule for {sport.toUpperCase()}
           </h1>
-          <ul className={`grid grid-cols-1 gap-4 mt-4`}>
-            {schedule.map((game: Game, index: number) => {
-              return (
-                <li
-                  key={index}
-                  className="p-2 border hover:border-gray-700 rounded-lg col-span-1 transition-all duration-300 ease-in-out hover:scale-105"
-                >
-                  <GameCard game={game} sport={sport} />
+          <div className="grid grid-cols-1 lg:grid-cols-3 p-2">
+            <div className="col-span-1 space-y-4">
+              {schedule.map((game: Game, index: number) => (
+                <div key={index} className="" onClick={() => {
+                  console.log("Game clicked:", game);
                   
-                </li>
-              );
-            })}
-          </ul>
+                  if(selectedGame?.id === game.id) {
+                    setSelectedGame(null);
+                  } else {
+                    setSelectedGame(game);
+                  }
+                }}>
+                  <GameCard game={game} sport={sport} />
+                  {selectedGame?.id && game?.id == selectedGame?.id && (
+                    <div className="col-span-full lg:hidden">
+                      <GamePreview game={selectedGame} sport={sport} />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            {selectedGame && (
+              <div className="hidden lg:block lg:col-span-2 lg:pl-4">
+                <GamePreview key={selectedGame.id} game={selectedGame} sport={sport} />
+              </div>
+            )}
+          </div>
         </div>
       ) : (
         <p>Loading schedule...</p>

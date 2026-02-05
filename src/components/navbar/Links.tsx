@@ -34,7 +34,7 @@ const Links = () => {
           />
         )}
         {showMobileMenu && (
-          <div className="absolute top-20 left-0 flex flex-col items-center w-full p-4 gap-y-2 text-2xl bg-black border-b-2">
+          <div className="absolute top-24 left-0 flex flex-col items-center w-full p-4 gap-y-2 text-2xl bg-black border-b-2">
             {links.map((link, index) => (
               <button
                 className="border w-full rounded"
