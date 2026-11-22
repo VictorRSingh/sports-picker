@@ -2,20 +2,79 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Theme tokens. Override these at :root, [data-theme], or a team container. */
 :root {
-    --background: #0a0a0a;
-    --foreground: #ffffff;
+  color-scheme: dark;
+  --color-background: #0b0d10;
+  --color-surface: #161a20;
+  --color-surface-raised: #202630;
+  --color-border: #353d49;
+  --color-text: #f0f2f5;
+  --color-text-muted: #9ba5b4;
+  --color-text-soft: #c5ccd6;
+  --color-accent: #495463; /* dark slate, formerly olive/blue */
+  --color-accent-hover: #5b687a;
+  --color-accent-contrast: #ffffff;
+  --color-accent-soft: #29313d;
+  --color-highlight: #a68357; /* warm gold */
+  --color-danger: #a32d21;
+  --color-ai-action: #7c3aed;
+  --color-ai-action-hover: #6d28d9;
+  --color-ai-action-text: #ffffff;
+  --background: var(--color-background);
+  --foreground: var(--color-text);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ffffff;
-  }
-}
+/* Future team themes can override just the tokens they need.
+   Example: <main data-theme="team-example">...</main> */
+/* [data-theme="team-example"] { --color-accent: #7c3aed; --color-accent-hover: #8b5cf6; } */
 
+* { box-sizing: border-box; }
+html { min-height: 100%; background: var(--color-background); }
 body {
-  color: var(--foreground);
-  background: var(--background);
+  min-height: 100vh;
+  margin: 0;
+  color: var(--color-text);
+  background: radial-gradient(circle at 80% -10%, var(--color-surface-raised) 0, transparent 40%), var(--color-background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@layer components {
+  .dashboard-panel {
+    @apply rounded-xl border shadow-lg shadow-black/10;
+    border-color: var(--color-border);
+    background: var(--color-surface);
+  }
+  .dashboard-muted { color: var(--color-text-muted); }
+  .dashboard-heading { @apply text-lg font-semibold tracking-tight; color: var(--color-text); }
+}
+
+/* Semantic theme utilities: use these instead of literal Tailwind colors. */
+@layer utilities {
+  .theme-bg { background-color: var(--color-background); }
+  .theme-surface { background-color: var(--color-surface); }
+  .theme-surface-raised { background-color: var(--color-surface-raised); }
+  .theme-accent-bg { background-color: var(--color-accent); color: var(--color-accent-contrast); }
+  .theme-accent-bg-hover:hover { background-color: var(--color-accent-hover); }
+  .theme-accent-soft-bg { background-color: var(--color-accent-soft); }
+  .theme-accent-text { color: var(--color-accent-hover); }
+  .theme-accent-contrast { color: var(--color-accent-contrast); }
+  .theme-text { color: var(--color-text); }
+  .theme-text-soft { color: var(--color-text-soft); }
+  .theme-muted { color: var(--color-text-muted); }
+  .theme-border { border-color: var(--color-border); }
+  .theme-border-accent { border-color: var(--color-accent-hover); }
+  .theme-highlight { color: var(--color-highlight); }
+  .theme-danger { color: var(--color-danger); }
+  .theme-hover-surface:hover { background-color: var(--color-surface-raised); }
+  .theme-hover-accent:hover { color: var(--color-accent-hover); }
+}
+
+/* League hub: shared accent tokens remain overridable for future team themes. */
+.theme-highlight { color: var(--color-highlight); }
+html { scroll-behavior: smooth; }
+
+/* Distinct AI call-to-action; overridable in future team/user themes. */
+.ai-action-button { background: var(--color-ai-action); color: var(--color-ai-action-text); transition: background-color .15s, box-shadow .15s; }
+.ai-action-button:hover:not(:disabled) { background: var(--color-ai-action-hover); box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-ai-action) 35%, transparent); }
+.ai-action-button:focus-visible { outline: 2px solid var(--color-ai-action); outline-offset: 2px; }

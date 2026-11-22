@@ -1,18 +1,5 @@
 import ScheduleCard from "@/components/schedule/ScheduleCard";
-import StandingsCard from "@/components/standings/StandingsCard";
-import React from "react";
-
-type SportHomeViewProps = {
-  sport: string;
-};
-
-const SportHomeView = ({ sport }: SportHomeViewProps) => {
-  return (
-    <div className="flex w-full flex-col gap-y-4">
-      <ScheduleCard sport={sport} />
-      <StandingsCard sport={sport} />
-    </div>
-  );
-};
-
-export default SportHomeView;
+import CompactStandings from "@/components/standings/CompactStandings";
+export default function SportHomeView({ sport }: { sport: string }) {
+  return <div className="w-full pb-8"><ScheduleCard sport={sport} sidebar={<CompactStandings sport={sport} />} /></div>;
+}

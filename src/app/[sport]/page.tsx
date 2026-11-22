@@ -20,7 +20,7 @@ export default function SportPage({
   }
 
   return (
-    <div className="flex lg:w-3/4 m-auto h-full w-full">
+    <div className="mx-auto min-h-screen w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
       <>
         <SportHomeView sport={sportLower} />
       </>

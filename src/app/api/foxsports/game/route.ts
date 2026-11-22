@@ -1,3 +1,4 @@
+import { nflEspnGame } from "./nflEspn";
 import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
 import * as cheerio from "cheerio";
@@ -9,6 +10,7 @@ export async function GET(request: NextRequest) {
   const sport = searchParams.get("sport");
   const webUrl = searchParams.get("webUrl");
 
+  if (sport === "nfl" && webUrl?.startsWith("espn:")) return nflEspnGame(webUrl.slice(5));
   const url = `https://foxsports.com${webUrl}`;
 
   try {

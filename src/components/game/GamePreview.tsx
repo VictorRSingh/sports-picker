@@ -1,186 +1,27 @@
-import { Game } from "@/types/Game";
-import React from "react";
-import MatchupHeader from "../matchups/MatchupHeader";
-import MatchupRow from "../matchups/MatchupRow";
+"use client";
+import { useState } from "react";
+import type { Game } from "@/types/Game";
 import { useGame } from "@/hooks/useGame";
-
-interface GamePreviewProps {
-  game: Game;
-  sport: string;
+type Stat = { abbr?: string; name?: string; value?: string | number };
+function Comparison({ data, leaders = false }: { data: any; leaders?: boolean }) {
+  if (!data?.awayTeam && !data?.homeTeam) return <p className="py-3 text-xs theme-muted">Comparison data unavailable for this matchup.</p>;
+  const away = data.awayTeam, home = data.homeTeam;
+  const left: Stat[] = away?.stats ?? [], right: Stat[] = home?.stats ?? [];
+  return <div className="min-w-0">
+    <div className="grid grid-cols-[minmax(0,1fr)_65px_minmax(0,1fr)] items-center gap-2 border-b theme-border pb-2 text-center text-xs font-semibold"><div className="flex min-w-0 items-center justify-center gap-2">{away?.image && <img src={away.image} alt="" className="h-6 w-6 object-contain"/>}<span className="truncate">{away?.name || "Away"}</span></div><span className="text-[10px] theme-muted">STAT</span><div className="flex min-w-0 items-center justify-center gap-2">{home?.image && <img src={home.image} alt="" className="h-6 w-6 object-contain"/>}<span className="truncate">{home?.name || "Home"}</span></div></div>
+    <div className="divide-y divide-[var(--color-border)]">{left.map((stat, i) => <div key={i} className="grid grid-cols-[minmax(0,1fr)_65px_minmax(0,1fr)] items-center gap-2 py-2 text-xs"><div className="min-w-0 text-right"><span className="font-semibold">{stat.value ?? "—"}</span>{leaders && <div className="truncate text-[10px] theme-muted" title={stat.name}>{stat.name}</div>}</div><span className="text-center text-[10px] font-semibold uppercase theme-muted">{stat.abbr}</span><div className="min-w-0"><span className="font-semibold">{right[i]?.value ?? "—"}</span>{leaders && <div className="truncate text-[10px] theme-muted" title={right[i]?.name}>{right[i]?.name}</div>}</div></div>)}</div>
+  </div>;
 }
-
-const GamePreview = ({ game, sport }: GamePreviewProps) => {
-  const gameInfo = useGame(sport, game.webUrl);
-
-  const Game = gameInfo.game;
-
-  return (
-    <>
-    {Game ? (
-      <div className="my-8 space-y-6 rounded-lg shadow-md justify-between w-full items-start">
-      {/* Featured Pairing */}
-      <div className="space-y-4">
-        <div className="text-3xl mb-4">{Game?.featuredPairing?.title}</div>
-        <div className="grid grid-cols-3">
-          <div className="col-span-1 flex items-center flex-col justify-center">
-            <a href={Game?.featuredPairing?.awayPlayer?.webUrl}>
-              <img
-                className="border rounded-full"
-                width={72}
-                src={Game?.featuredPairing?.awayPlayer?.image}
-              />
-            </a>
-            {Game?.featuredPairing?.awayPlayer?.name}
-            {Game?.featuredPairing?.awayPlayer?.stats?.map((stat: any, index: any) => (
-              <React.Fragment key={index}>
-                <p>{stat}</p>
-              </React.Fragment>
-            ))}
-          </div>
-          <div className="col-span-1 flex items-center justify-center text-2xl font-bold">
-            VS
-          </div>
-          <div className="col-span-1 flex items-center flex-col justify-center">
-            <a href={Game?.featuredPairing?.homePlayer?.webUrl}>
-              <img
-                className="border rounded-full"
-                width={72}
-                src={Game?.featuredPairing?.homePlayer?.image}
-              />
-            </a>
-            {Game?.featuredPairing?.homePlayer?.name}
-                        {Game?.featuredPairing?.homePlayer?.stats?.map((stat: any, index: any) => (
-              <React.Fragment key={index}>
-                <p>{stat}</p>
-              </React.Fragment>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Team Stats Comparison */}
-      <div className="space-y-6 rounded-lg shadow-md max-w-md mx-auto">
-        <div className="text-3xl mb-4">{Game?.teamStatsComparison?.title}</div>
-
-        <div className="grid grid-cols-3 gap-y-3 gap-x-6 items-center">
-          {/* Header with team logos and names */}
-          <div className="col-span-1 flex items-center justify-end space-x-3 border-b border-gray-300 pb-3">
-            <img
-              width={40}
-              height={40}
-              className="rounded-full"
-              src={Game?.teamStatsComparison?.awayTeam?.image}
-              alt={`${Game?.teamStatsComparison?.awayTeam?.name} logo`}
-            />
-            <h1 className="text-xl font-semibold">
-              {Game?.teamStatsComparison?.awayTeam?.name}
-            </h1>
-          </div>
-          <div className="col-span-1 pb-3"></div>
-          <div className="col-span-1 flex items-center space-x-3 border-b border-gray-300 pb-3">
-            <img
-              width={40}
-              height={40}
-              className="rounded-full"
-              src={Game?.teamStatsComparison?.homeTeam?.image}
-              alt={`${Game?.teamStatsComparison?.homeTeam?.name} logo`}
-            />
-            <h1 className="text-xl font-semibold">
-              {Game?.teamStatsComparison?.homeTeam?.name}
-            </h1>
-          </div>
-
-          {/* Stats rows */}
-          {Game?.teamStatsComparison?.awayTeam?.stats?.map((stat, index) => (
-            <React.Fragment key={index}>
-              {/* Away team stat value, aligned right */}
-              <div className="flex justify-end text-lg font-medium text-blue-600 border-b border-gray-200 py-2">
-                {stat.value}
-              </div>
-
-              {/* Stat abbreviation, centered */}
-              <div className="flex justify-center font-semibold text-gray-600 border-b border-gray-200 py-2">
-                {stat.abbr}
-              </div>
-
-              {/* Home team stat value, aligned left */}
-              <div className="flex justify-start text-lg font-medium text-red-600 border-b border-gray-200 py-2">
-                {Game.teamStatsComparison?.homeTeam?.stats?.[index]?.value ??
-                  ""}
-              </div>
-            </React.Fragment>
-          ))}
-        </div>
-      </div>
-
-      {/* Team Leaders Comparison */}
-      <div className="space-y-6 rounded-lg shadow-md max-w-md mx-auto">
-        <div className="text-3xl mb-4">
-          {Game?.teamLeadersComparison?.title}
-        </div>
-
-        <div className="grid grid-cols-3 gap-y-3 gap-x-6 items-center">
-          {/* Header with team logos and names */}
-          <div className="col-span-1 flex items-center justify-end space-x-3 border-b border-gray-300 pb-3">
-            <img
-              width={40}
-              height={40}
-              className="rounded-full"
-              src={Game?.teamLeadersComparison?.awayTeam?.image}
-              alt={`${Game?.teamLeadersComparison?.awayTeam?.name} logo`}
-            />
-            <h1 className="text-xl font-semibold">
-              {Game?.teamLeadersComparison?.awayTeam?.name}
-            </h1>
-          </div>
-          <div className="col-span-1 pb-3"></div>
-          <div className="col-span-1 flex items-center space-x-3 border-b border-gray-300 pb-3">
-            <img
-              width={40}
-              height={40}
-              className="rounded-full"
-              src={Game?.teamLeadersComparison?.homeTeam?.image}
-              alt={`${Game?.teamLeadersComparison?.homeTeam?.name} logo`}
-            />
-            <h1 className="text-xl font-semibold">
-              {Game?.teamLeadersComparison?.homeTeam?.name}
-            </h1>
-          </div>
-
-          {/* Stats rows */}
-          {Game?.teamLeadersComparison?.awayTeam?.stats?.map((stat, index) => (
-            <React.Fragment key={index}>
-              {/* Away team stat value, aligned right */}
-              <div className="flex flex-col text-end justify-end text-sm font-medium text-blue-600 border-b border-gray-200 py-2">
-                <h1>{stat.name} </h1>
-                <p className="text-lg">{stat.value}</p>
-              </div>
-
-              {/* Stat abbreviation, centered */}
-              <div className="flex justify-center font-semibold text-gray-600 border-b border-gray-200 py-2">
-                {stat.abbr}
-              </div>
-
-              {/* Home team stat value, aligned left */}
-              <div className="flex flex-col justify-start text-sm font-medium text-red-600 border-b border-gray-200 py-2">
-                <h1>
-                  {Game?.teamLeadersComparison?.homeTeam?.stats?.[index]?.name}{" "}
-                </h1>
-                <p className="text-lg">
-                  {Game.teamLeadersComparison?.homeTeam?.stats?.[index]
-                    ?.value ?? ""}
-                </p>
-              </div>
-            </React.Fragment>
-          ))}
-        </div>
-      </div>
-    </div>
-    ) : (
-      <div>Loading game preview...</div>
-    )}
-    </>
-  );
-};
-
-export default GamePreview;
+function Spotlight({ player, label }: { player: any; label: string }) { return <div className="flex min-w-0 items-center gap-2">{player?.image ? <img src={player.image} alt="" className="h-10 w-10 shrink-0 rounded-full object-cover"/> : <div className="h-10 w-10 shrink-0 rounded-full theme-surface-raised"/>}<div className="min-w-0"><div className="truncate text-xs font-semibold">{player?.webUrl ? <a href={player.webUrl} className="hover:underline">{player.name || label}</a> : player?.name || label}</div><div className="text-[10px] theme-muted">{player?.stats?.slice(0, 3).join(" · ") || "No player stats"}</div></div></div>; }
+export default function GamePreview({ game, sport }: { game: Game; sport: string }) {
+  const gameInfo = useGame(sport, game.webUrl), detail = gameInfo.game;
+  const [comparison, setComparison] = useState<"stats" | "leaders">("stats");
+  if (!detail) return <div className="dashboard-panel p-5 text-xs theme-muted">{gameInfo.loading ? "Loading matchup details…" : gameInfo.error ? `Unable to load matchup details: ${gameInfo.error}` : "Matchup details unavailable."}</div>;
+  return <div className="dashboard-panel min-w-0 p-3 sm:p-4">
+    <div className="mb-3 flex flex-wrap items-center justify-between gap-2"><h3 className="text-sm font-bold">{detail.featuredPairing?.title || "Featured matchup"}</h3><span className="text-[10px] theme-muted">{sport.toUpperCase()}</span></div>
+    {(detail.featuredPairing?.awayPlayer || detail.featuredPairing?.homePlayer) && <div className="mb-3 grid grid-cols-1 gap-2 border-b theme-border pb-3 sm:grid-cols-2"><Spotlight player={detail.featuredPairing?.awayPlayer} label="Away player"/><Spotlight player={detail.featuredPairing?.homePlayer} label="Home player"/></div>}
+    {detail.pregame && <p className="mb-3 text-xs theme-muted">Pregame matchup: box-score statistics and player leaders are not available until the game begins.</p>}
+    <div className="mb-3 flex items-center justify-between gap-2"><h4 className="text-xs font-semibold">Team comparison</h4><div className="flex gap-1 rounded-lg theme-surface-raised p-1">{([ ["stats", "Team stats"], ["leaders", "Team leaders"] ] as const).map(([key, label]) => <button key={key} type="button" onClick={() => setComparison(key)} className={`rounded-md px-2 py-1 text-[10px] ${comparison === key ? "theme-accent-bg" : "theme-muted"}`}>{label}</button>)}</div></div>
+    <Comparison data={comparison === "stats" ? detail.teamStatsComparison : detail.teamLeadersComparison} leaders={comparison === "leaders"}/>
+  </div>;
+}

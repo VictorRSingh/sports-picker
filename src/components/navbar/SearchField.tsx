@@ -19,16 +19,16 @@ const SearchField = ({
   const router = useRouter();
 
   return (
-    <div className="relative w-full mt-4 lg:mt-0">
+    <div className="relative w-full">
       <input
         type="text"
-        className="bg-gray-600 rounded px-4 py-2 w-full"
+        className="w-full rounded-lg border theme-border theme-surface-raised/80 px-4 py-2 text-sm theme-text outline-none placeholder:theme-muted focus:theme-border-accent"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search Players or Teams"
       />
       {searchResults && query.length > 2 && (
-        <div className="absolute top-11 p-2 bg-gray-600 w-full text-base border-t">
+        <div className="absolute top-12 z-50 w-full rounded-xl border theme-border theme-surface p-3 text-sm shadow-2xl">
           {searchResults.players.length > searchResults.teams.length ? (
             <div className="flex flex-col gap-y-4">
               <div className="flex flex-col gap-y-2">

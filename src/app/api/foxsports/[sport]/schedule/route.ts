@@ -6,6 +6,51 @@ import { Game } from "@/types/Game";
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const sport = searchParams.get("sport");
+
+  // NFL schedules are grouped by official season week, not a single calendar day.
+  if (sport === "nfl") {
+    const year = Number(searchParams.get("year") ?? new Date().getFullYear());
+    const week = Number(searchParams.get("week") ?? 1);
+    const stage = Number(searchParams.get("stage") ?? 2); // 1 preseason, 2 regular, 3 postseason
+    if (!Number.isInteger(year) || year < 2000 || year > 2100 || !Number.isInteger(week) || week < 1 || week > 18 || ![1,2,3].includes(stage)) {
+      return NextResponse.json({ error: "Invalid NFL season/week" }, { status: 400 });
+    }
+    try {
+      const endpoint = new URL("https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard");
+      endpoint.searchParams.set("dates", String(year));
+      endpoint.searchParams.set("seasontype", String(stage));
+      endpoint.searchParams.set("week", String(week));
+      const response = await fetch(endpoint, { next: { revalidate: 300 }, headers: { Accept: "application/json" } });
+      if (!response.ok) throw new Error(`NFL scoreboard returned ${response.status}`);
+      const payload = await response.json();
+      const games = (Array.isArray(payload.events) ? payload.events : []).map((event: any) => {
+        const competition = event.competitions?.[0];
+        const competitors = competition?.competitors ?? [];
+        const away = competitors.find((team: any) => team.homeAway === "away");
+        const home = competitors.find((team: any) => team.homeAway === "home");
+        const kickoff = event.date ? new Date(event.date) : null;
+        const state = event.status?.type?.state;
+        const status = state === "in" ? "LIVE" : state === "post" ? "FINAL" : kickoff && !Number.isNaN(kickoff.getTime()) ? kickoff.toLocaleTimeString("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit" }) + " ET" : "Scheduled";
+        return {
+          id: String(event.id),
+          date: kickoff && !Number.isNaN(kickoff.getTime()) ? kickoff.toLocaleDateString("en-US", { timeZone: "America/New_York", weekday: "short", month: "short", day: "numeric" }) : "NFL",
+          status,
+          teams: {
+            awayTeam: { name: away?.team?.displayName ?? "Away", logo: away?.team?.logo ?? "", webUrl: "", score: away?.score },
+            homeTeam: { name: home?.team?.displayName ?? "Home", logo: home?.team?.logo ?? "", webUrl: "", score: home?.score },
+          },
+          location: { city: competition?.venue?.address?.city ?? "", stadium: competition?.venue?.fullName ?? "" },
+          webUrl: `espn:${event.id}`, // Provider-specific ID routed to ESPN summary
+          week,
+        };
+      });
+      return NextResponse.json(games);
+    } catch (error) {
+      console.error("NFL weekly schedule fetch failed:", error);
+      return NextResponse.json({ success: false, games: [], message: "NFL weekly schedule temporarily unavailable" }, { status: 502 });
+    }
+  }
+
   const today = new Date();
   const yyyy = today.getFullYear();
   const mm = String(today.getMonth() + 1).padStart(2, "0");

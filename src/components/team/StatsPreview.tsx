@@ -6,7 +6,7 @@ interface StatsPreviewProps {
 }
 
 const colors = [
-  "bg-blue-600",
+  "theme-accent-bg",
   "bg-green-600",
   "bg-purple-600",
   "bg-pink-600",
@@ -23,7 +23,7 @@ const StatsPreview = ({ teamStats }: StatsPreviewProps) => {
             key={idx}
           >
             <h2 className="text-3xl font-extrabold mb-4 flex items-center gap-2">
-              <span className="inline-block w-2 h-8 bg-blue-600 rounded-full"></span>
+              <span className="inline-block w-2 h-8 theme-accent-bg rounded-full"></span>
               {stat.category.toLocaleLowerCase().charAt(0).toUpperCase() + stat.category.slice(1).toLocaleLowerCase()}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-h-96 lg:max-h-full overflow-y-auto">

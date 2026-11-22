@@ -7,8 +7,15 @@ export async function GET(request: NextRequest) {
   const playerUrl = searchParams.get("playerUrl");
 
   const currentYear = new Date().getFullYear();
-  const url = `https://www.foxsports.com${playerUrl}-game-log?seasonType=reg&season=${currentYear}`;
-  console.log("GameLog URL", url);
+  const seasonParam = searchParams.get("season") ?? String(currentYear);
+  const season = Number(seasonParam);
+  if (!Number.isInteger(season) || season < 2010 || season > currentYear) {
+    return NextResponse.json({ error: "Unsupported season" }, { status: 400 });
+  }
+  if (!playerUrl || !/^\/(nba|nfl|nhl)\/[a-z0-9-]+$/.test(playerUrl)) {
+    return NextResponse.json({ error: "Invalid player URL" }, { status: 400 });
+  }
+  const url = `https://www.foxsports.com${playerUrl}-game-log?seasonType=reg&season=${season}`;
 
   try {
     const response = await axios.get(url);
@@ -56,6 +63,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(gameLog);
   } catch (error) {
     console.error("Failed to fetch Gamelogs");
-    return NextResponse.json({ message: "Failed to fetch Gamelogs" });
+    return NextResponse.json({ error: "Failed to fetch game logs" }, { status: 502 });
   }
 }
